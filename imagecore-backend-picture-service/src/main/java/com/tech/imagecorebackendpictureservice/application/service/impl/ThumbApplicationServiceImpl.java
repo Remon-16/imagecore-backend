@@ -7,7 +7,7 @@ import com.tech.imagecorebackendpictureservice.application.service.ThumbApplicat
 import com.tech.imagecorebackendpictureservice.domain.picture.service.ThumbDomainService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class ThumbApplicationServiceImpl implements ThumbApplicationService {

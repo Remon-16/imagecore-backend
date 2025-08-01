@@ -17,7 +17,7 @@ import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendspaceservice.application.service.SpaceUserApplicationService;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

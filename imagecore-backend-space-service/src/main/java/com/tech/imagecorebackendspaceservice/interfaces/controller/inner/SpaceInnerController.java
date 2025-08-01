@@ -10,7 +10,7 @@ import com.tech.imagecorebackendspaceservice.application.service.SpaceApplicatio
 import com.tech.imagecorebackendspaceservice.auth.SpaceUserAuthManager;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 @RestController

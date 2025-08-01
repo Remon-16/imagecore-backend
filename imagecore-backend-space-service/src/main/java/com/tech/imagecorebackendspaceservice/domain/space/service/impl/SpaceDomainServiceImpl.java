@@ -13,7 +13,7 @@ import com.tech.imagecorebackendspaceservice.domain.space.repository.SpaceReposi
 import com.tech.imagecorebackendspaceservice.domain.space.service.SpaceDomainService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * @author Remon

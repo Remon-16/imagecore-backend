@@ -8,7 +8,7 @@ import com.tech.imagecorebackendmodel.space.entity.SpaceUser;
 import com.tech.imagecorebackendmodel.vo.space.SpaceUserVO;
 
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**

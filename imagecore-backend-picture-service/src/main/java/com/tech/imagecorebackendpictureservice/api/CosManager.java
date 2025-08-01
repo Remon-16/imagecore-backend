@@ -10,7 +10,7 @@ import com.qcloud.cos.model.ciModel.persistence.PicOperations;
 import com.tech.imagecorebackendpictureservice.infrastructure.config.CosClientConfig;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

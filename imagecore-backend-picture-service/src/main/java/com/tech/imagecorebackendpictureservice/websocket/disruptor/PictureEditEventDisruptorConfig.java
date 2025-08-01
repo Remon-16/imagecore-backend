@@ -5,7 +5,7 @@ import com.lmax.disruptor.dsl.Disruptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 图片编辑事件 Disruptor 配置
