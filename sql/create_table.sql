@@ -130,7 +130,60 @@ create table if not exists thumb
     userId     bigint                             not null,
     pictureId     bigint                             not null,
     createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间'
-);
+)comment '点赞记录' collate = utf8mb4_unicode_ci;
 create unique index idx_userId_pictureId
     on thumb (userId, pictureId);
+
+-- 用户积分表
+create table if not exists score_user
+(
+    id         bigint auto_increment primary key,
+    userId     bigint                                 not null comment '用户 id',
+    scoreAmount      bigint                                 not null comment '积分变动值',
+    scoreType  varchar(128)                           not null comment '积分变动类型',
+    createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    editTime   datetime default CURRENT_TIMESTAMP not null comment '编辑时间',
+    updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete   tinyint  default 0                 not null comment '是否删除',
+
+    INDEX idx_userId (userId)       -- 提升基于用户的查询效率
+)comment '用户积分' collate = utf8mb4_unicode_ci;
+
+-- 添加新列
+ALTER TABLE user
+    ADD COLUMN userScore  bigint  null DEFAULT 0 comment '积分余额';
+
+-- 添加新列
+ALTER TABLE user
+    ADD COLUMN vipExpiry  bigint  null  comment '会员到期时间';
+
+-- 添加新列
+ALTER TABLE user
+    ADD COLUMN vipType  varchar(128)  null DEFAULT 0  comment '会员类型';
+
+-- 用户和AI聊天的关联表
+create table if not exists user_ai_chat(
+    id         bigint auto_increment primary key,
+    userId     bigint                                 not null comment '用户 id',
+    conversationId varchar(256)                      not null comment 'chat id',
+
+    INDEX idx_userId (userId)       -- 提升基于用户的查询效率
+)comment '用户和AI聊天的关联表' collate = utf8mb4_unicode_ci;
+
+-- 消息表
+create table if not exists message(
+    id         bigint auto_increment primary key,
+    userId     bigint                                 not null comment '用户 id',
+    content    longtext                               not null comment '消息内容',
+    messageType varchar(128)                          not null comment '消息类型',
+    messageState varchar(128)                         not null comment '消息状态', -- 0 未读 1 已读
+    senderId   bigint                                 not null comment '发送者 id', -- 系统消息用户： system001
+    createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    editTime   datetime default CURRENT_TIMESTAMP not null comment '编辑时间',
+    updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete   tinyint  default 0                 not null comment '是否删除',
+
+    INDEX idx_userId (userId)       -- 提升基于用户的查询效率
+)comment '消息表' collate = utf8mb4_unicode_ci;
+
 
