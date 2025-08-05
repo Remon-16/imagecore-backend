@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tech.imagecorebackenduserservice.infrastructure.mapper.ScoreUserMapper">
+
+    <resultMap id="BaseResultMap" type="com.tech.imagecorebackendmodel.user.entity.ScoreUser">
+            <id property="id" column="id" />
+            <result property="userId" column="userId" />
+            <result property="scoreAmount" column="scoreAmount" />
+            <result property="scoreType" column="scoreType" />
+            <result property="createTime" column="createTime" />
+            <result property="editTime" column="editTime" />
+            <result property="updateTime" column="updateTime" />
+            <result property="isDelete" column="isDelete" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,userId,scoreAmount,scoreType,createTime,editTime,
+        updateTime,isDelete
+    </sql>
+</mapper>
