@@ -1,4 +1,4 @@
-package com.tech.imagecorebackendmodel.user.entity;
+package com.tech.imagecorebackendmodel.picture.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
@@ -7,12 +7,12 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 用户和AI聊天的关联表
- * @TableName user_ai_chat
+ * 评论表
+ * @TableName picture_comment
  */
-@TableName(value ="user_ai_chat")
+@TableName(value ="picture_comment")
 @Data
-public class UserAiChat implements Serializable {
+public class PictureComment implements Serializable {
     /**
      * 
      */
@@ -25,9 +25,19 @@ public class UserAiChat implements Serializable {
     private Long userId;
 
     /**
-     * chat id
+     * 图片 id
      */
-    private String conversationId;
+    private Long pictureId;
+
+    /**
+     * 目标 id 为空代表是直接评论在图片上，不为空说明是多级评论
+     */
+    private Long targetId;
+
+    /**
+     * 评论内容
+     */
+    private String content;
 
     /**
      * 创建时间

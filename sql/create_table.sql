@@ -155,7 +155,7 @@ ALTER TABLE user
 
 -- 添加新列
 ALTER TABLE user
-    ADD COLUMN vipExpiry  bigint  null  comment '会员到期时间';
+    ADD COLUMN vipExpiry  datetime  null  comment '会员到期时间';
 
 -- 添加新列
 ALTER TABLE user
@@ -166,6 +166,10 @@ create table if not exists user_ai_chat(
     id         bigint auto_increment primary key,
     userId     bigint                                 not null comment '用户 id',
     conversationId varchar(256)                      not null comment 'chat id',
+    createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    editTime   datetime default CURRENT_TIMESTAMP not null comment '编辑时间',
+    updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete   tinyint  default 0                 not null comment '是否删除',
 
     INDEX idx_userId (userId)       -- 提升基于用户的查询效率
 )comment '用户和AI聊天的关联表' collate = utf8mb4_unicode_ci;
@@ -186,4 +190,19 @@ create table if not exists message(
     INDEX idx_userId (userId)       -- 提升基于用户的查询效率
 )comment '消息表' collate = utf8mb4_unicode_ci;
 
+-- 图片评论表
+create table if not exists picture_comment(
+    id         bigint auto_increment primary key,
+    userId     bigint                                 not null comment '用户 id',
+    pictureId  bigint                                 not null comment '图片 id',
+    targetId   bigint                                 null comment '目标 id 为空代表是直接评论在图片上，不为空说明是多级评论',
+    content    varchar(1024)                          not null comment '评论内容',
+    createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    editTime   datetime default CURRENT_TIMESTAMP not null comment '编辑时间',
+    updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete   tinyint  default 0                 not null comment '是否删除',
+
+    INDEX idx_userId (userId),       -- 提升基于用户的查询效率
+    INDEX idx_pictureId (pictureId)       -- 提升基于用户的查询效率
+)comment '评论表' collate = utf8mb4_unicode_ci;
 
