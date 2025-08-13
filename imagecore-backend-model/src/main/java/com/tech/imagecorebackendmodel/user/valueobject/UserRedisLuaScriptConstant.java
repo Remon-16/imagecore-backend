@@ -11,15 +11,20 @@ public class UserRedisLuaScriptConstant {
             local userScoreKey = KEYS[2]       -- 用户积分余额（如 imagocore:user:score:{userId}）
             local userScoreCountKey = KEYS[3]  -- 用户积分获取次数记录（如 imagocore:user:scoreCount:{scoreType}:{userId}）
             local userId = ARGV[1]             -- 用户 ID
-            local score = ARGV[2]             --  积分变化值
+            local score = ARGV[2]              -- 积分变化值
+            local ScoreType = ARGV[3]          -- 积分变化原因
+            
+            local hashKey = userId .. ':' .. ScoreType
             
             -- 2. 获取当前积分值（若不存在则默认为 0）
+            local oldTempScore = tonumber(redis.call('HGET', tempScoreKey, hashKey) or 0)
             local oldScore = tonumber(redis.call('GET', userScoreKey) or 0)
             
             -- 3. 计算新积分
             local newScore = tonumber(score) + oldScore
+            local newTempScore = tonumber(score) + oldTempScore
             
-            redis.call('SET', tempScoreKey, score)
+            redis.call('HSET', tempScoreKey, hashKey, newTempScore)
             redis.call('SET', userScoreKey, timeSlice)
             
             -- 4. 如果是增加积分，需要更新限制次数

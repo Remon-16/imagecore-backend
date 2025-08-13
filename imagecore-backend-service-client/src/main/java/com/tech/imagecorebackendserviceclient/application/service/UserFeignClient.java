@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -105,4 +106,7 @@ public interface UserFeignClient {
 
     @PostMapping("/score/checkScore")
     Boolean checkScore(@RequestBody UserScoreRequest userScoreRequest);
+
+    @PostMapping("/score/batchUpdateScore")
+    void batchUpdateScore(@RequestBody Map<Long, Long> scoreMap);
 }

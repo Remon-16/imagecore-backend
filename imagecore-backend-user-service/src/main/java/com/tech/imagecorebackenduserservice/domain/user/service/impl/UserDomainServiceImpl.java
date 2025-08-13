@@ -24,6 +24,7 @@ import com.tech.imagecorebackendmodel.vo.user.UserVO;
 import com.tech.imagecorebackenduserservice.domain.user.repository.UserRepository;
 import com.tech.imagecorebackenduserservice.domain.user.service.UserDomainService;
 import com.tech.imagecorebackenduserservice.infrastructure.dco.UserCacheHandler;
+import com.tech.imagecorebackenduserservice.infrastructure.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,9 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Resource
     UserCacheHandler userCacheHandler;
+
+    @Resource
+    private UserMapper userMapper;
 
     private String getTimeSlice() {
         DateTime nowDate = DateUtil.date();
@@ -278,20 +282,21 @@ public class UserDomainServiceImpl implements UserDomainService {
     @Override
     public void userScoreChange(Long userId, String scoreType, Long score) {
         ThrowUtils.throwIf(userId == null, ErrorCode.PARAMS_ERROR, "用户为空");
+        ThrowUtils.throwIf(scoreType == null, ErrorCode.PARAMS_ERROR, "变动原因为空");
         ThrowUtils.throwIf(score == null, ErrorCode.PARAMS_ERROR, "积分为空");
         String timeSlice = getTimeSlice();
-        String userTempScoreKey = UserCacheHandler.getRedisKey(CacheUtils.getUserTempScoreCacheKey(userId.toString(), timeSlice));
+        String userTempScoreKey = UserCacheHandler.getRedisKey(CacheUtils.getUserTempScoreCacheKey(timeSlice));
         String userScoreKey = UserCacheHandler.getRedisKey(CacheUtils.getUserScoreCacheKey(userId.toString()));
 
-        String userScoreType = scoreType != null ?
-                UserCacheHandler.getRedisKey(CacheUtils.getUserScoreCountKey(scoreType, userId.toString())) : "deduct";
+        String userScoreType = UserCacheHandler.getRedisKey(CacheUtils.getUserScoreCountKey(scoreType, userId.toString()));
 
         // 执行 Lua 脚本
         long result = redisTemplate.execute(
                 UserRedisLuaScriptConstant.SCORE_HANDLE_SCRIPT,
                 Arrays.asList(userTempScoreKey, userScoreKey, userScoreType),
-                userId,
-                score
+                userId.toString(),
+                score,
+                scoreType
         );
 
     }
@@ -312,6 +317,11 @@ public class UserDomainServiceImpl implements UserDomainService {
             userScore = userRepository.getById(userId).getUserScore();
         }
         return userScore >= score;
+    }
+
+    @Override
+    public void batchUpdateScore(Map<Long, Long> scoreMap) {
+        userMapper.batchUpdateScore(scoreMap);
     }
 }
 

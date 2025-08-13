@@ -39,6 +39,7 @@ public class SyncThumb2DBCompensatoryJob {
         // 补偿数据
         for (String date : needHandleDataSet) {
             syncThumb2DBJob.syncThumb2DBByDate(date);
+            syncThumb2DBJob.syncScore2DBByDate(date);
         }
         log.info("临时数据补偿完成");
     }

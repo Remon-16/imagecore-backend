@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -33,19 +34,25 @@ public class UserInnerController implements UserFeignClient {
 
     @Override
     @PostMapping("/score/change")
-    public void userScoreChange(UserScoreRequest userScoreRequest) {
+    public void userScoreChange(@RequestBody UserScoreRequest userScoreRequest) {
         userApplicationService.userScoreChange(userScoreRequest.getUserId(), userScoreRequest.getScoreType(), userScoreRequest.getScore());
     }
 
     @Override
-    @PostMapping("/score/change")
-    public Long getUserAddScoreCount(UserScoreRequest userScoreRequest) {
-        return 0L;
+    @PostMapping("/score/useCount")
+    public Long getUserAddScoreCount(@RequestBody UserScoreRequest userScoreRequest) {
+        return userApplicationService.getUserAddScoreCount(userScoreRequest.getUserId(), userScoreRequest.getScoreType());
     }
 
     @Override
     @PostMapping("/score/checkScore")
-    public Boolean checkScore(UserScoreRequest userScoreRequest) {
+    public Boolean checkScore(@RequestBody UserScoreRequest userScoreRequest) {
         return userApplicationService.checkScore(userScoreRequest.getUserId(), userScoreRequest.getScore());
+    }
+
+    @Override
+    @PostMapping("/score/batchUpdateScore")
+    public void batchUpdateScore(@RequestBody Map<Long, Long> scoreMap) {
+        userApplicationService.batchUpdateScore(scoreMap);
     }
 }

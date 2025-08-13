@@ -5,11 +5,15 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.StrPool;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.tech.imagecorebackendcommon.utils.CacheUtils;
+import com.tech.imagecorebackendmodel.user.entity.ScoreUser;
 import com.tech.imagecorebackendpictureservice.infrastructure.dco.RedisKeyUtil;
 import com.tech.imagecorebackendmodel.picture.entity.Thumb;
 import com.tech.imagecorebackendmodel.picture.valueobject.ThumbTypeEnum;
 import com.tech.imagecorebackendpictureservice.domain.picture.service.ThumbDomainService;
 import com.tech.imagecorebackendpictureservice.infrastructure.mapper.PictureMapper;
+import com.tech.imagecorebackendserviceclient.application.service.ScoreUserFeignClient;
+import com.tech.imagecorebackendserviceclient.application.service.UserFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -33,6 +38,10 @@ public class SyncThumb2DBJob {
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
+    @Resource
+    private ScoreUserFeignClient scoreUserFeignClient;
+    @Resource
+    private UserFeignClient userFeignClient;
 
     @Scheduled(fixedRate = 10000)
     @Transactional(rollbackFor = Exception.class)
@@ -98,6 +107,39 @@ public class SyncThumb2DBJob {
             pictureMapper.batchUpdateThumbCount(pictureThumbCountMap);
         }
         redisTemplate.delete(tempThumbKey);
+    }
+
+    public void syncScore2DBByDate(String date){
+        String tempScoreKey = RedisKeyUtil.buildRedisKey(CacheUtils.getUserTempScoreCacheKey(date));
+        Map<Object, Object> allScoreThumbMap = redisTemplate.opsForHash().entries(tempScoreKey);
+        boolean scoreMapEmpty = CollUtil.isEmpty(allScoreThumbMap);
+
+        if (scoreMapEmpty) {
+            return;
+        }
+
+        List<ScoreUser> scoreUserList = new ArrayList<>();
+        Map<Long, Long> userScoreChangeMap = new HashMap<>();
+        for (Object userIdScoreObj : allScoreThumbMap.keySet()) {
+            String userIdScoreType = (String) userIdScoreObj;
+            String[] userIdAndScoreType = userIdScoreType.split(StrPool.COLON);
+            Long userId = Long.valueOf(userIdAndScoreType[0]);
+            Long oldScore = userScoreChangeMap.getOrDefault(userId, 0L);
+            Long curScore = (Long) allScoreThumbMap.get(userIdScoreType);
+            userScoreChangeMap.put(userId, oldScore + curScore);
+            String scoreType = userIdAndScoreType[1];
+            ScoreUser scoreUser = new ScoreUser();
+            scoreUser.setUserId(userId);
+            scoreUser.setScoreType(scoreType);
+            scoreUser.setScoreAmount(curScore);
+            scoreUserList.add(scoreUser);
+        }
+        scoreUserFeignClient.saveBatch(scoreUserList);
+        // 批量更新用户积分余额
+        if (!userScoreChangeMap.isEmpty()) {
+            userFeignClient.batchUpdateScore(userScoreChangeMap);
+        }
+        redisTemplate.delete(tempScoreKey);
     }
 
 }

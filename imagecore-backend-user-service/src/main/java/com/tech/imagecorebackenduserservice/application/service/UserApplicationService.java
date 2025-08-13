@@ -12,6 +12,7 @@ import com.tech.imagecorebackendmodel.vo.user.UserVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -115,4 +116,6 @@ public interface UserApplicationService {
     Long getUserAddScoreCount(Long userId, String scoreType);
 
     Boolean checkScore(Long userId, Long score);
+
+    void batchUpdateScore(Map<Long, Long> scoreMap);
 }

@@ -38,8 +38,8 @@ public class CacheUtils {
         return USER_SCORE_CACHE + ":" + key;
     }
 
-    public static String getUserTempScoreCacheKey(String key, String timeSlice){
-        return USER_TEMP_SCORE_CACHE + ":" + key + ":" + timeSlice;
+    public static String getUserTempScoreCacheKey(String timeSlice){
+        return USER_TEMP_SCORE_CACHE + ":" + timeSlice;
     }
 
     public static String getPictureCacheKey(String key){

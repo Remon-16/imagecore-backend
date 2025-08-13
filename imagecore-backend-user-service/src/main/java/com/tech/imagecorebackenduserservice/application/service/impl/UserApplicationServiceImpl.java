@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -34,6 +35,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
     @Resource
     private UserDomainService userDomainService;
+
 
     /**
      * 用户注册
@@ -196,6 +198,11 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     @Override
     public Boolean checkScore(Long userId, Long score) {
         return userDomainService.checkScore(userId, score);
+    }
+
+    @Override
+    public void batchUpdateScore(Map<Long, Long> scoreMap) {
+        userDomainService.batchUpdateScore(scoreMap);
     }
 }
 
