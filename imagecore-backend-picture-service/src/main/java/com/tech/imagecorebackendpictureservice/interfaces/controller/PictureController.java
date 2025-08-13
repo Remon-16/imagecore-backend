@@ -2,6 +2,7 @@ package com.tech.imagecorebackendpictureservice.interfaces.controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tech.imagecorebackendcommon.annotation.AddScore;
 import com.tech.imagecorebackendcommon.annotation.AuthCheck;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.AliYunAiApi;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.model.CreateOutPaintingTaskResponse;
@@ -26,6 +27,7 @@ import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.picture.PictureTagCategory;
 import com.tech.imagecorebackendmodel.vo.picture.PictureVO;
 import com.tech.imagecorebackendpictureservice.application.service.PictureApplicationService;
+import com.tech.imagecorebackendmodel.user.constant.UseScoreConstant;
 import com.tech.imagecorebackendpictureservice.interfaces.assembler.PictureAssembler;
 import com.tech.imagecorebackendserviceclient.application.service.SpaceFeignClient;
 import com.tech.imagecorebackendserviceclient.application.service.UserFeignClient;
@@ -47,7 +49,7 @@ import java.util.List;
 public class PictureController {
 
     @Resource
-    private UserFeignClient userApplicationService;
+    private UserFeignClient userFeignClient;
 
     @Resource
     private PictureApplicationService pictureApplicationService;
@@ -63,13 +65,14 @@ public class PictureController {
      * 上传图片（可重新上传）
      */
     @PostMapping("/upload")
-//    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_UPLOAD)
-//    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @AddScore(type = UseScoreConstant.UPLOAD_PICTURE,
+            value = 20L,
+            maxCount = -1L)
     public BaseResponse<PictureVO> uploadPicture(
             @RequestPart("file") MultipartFile multipartFile,
             PictureUploadRequest pictureUploadRequest,
             HttpServletRequest request) {
-        User loginUser = userApplicationService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         Space space = spaceFeignClient.getById(pictureUploadRequest.getSpaceId());
 
         SpaceUserAuthRequest spaceUserAuthRequest = new SpaceUserAuthRequest();
@@ -87,11 +90,13 @@ public class PictureController {
      * 通过 URL 上传图片（可重新上传）
      */
     @PostMapping("/upload/url")
-//    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_UPLOAD)
+    @AddScore(type = UseScoreConstant.UPLOAD_PICTURE,
+            value = 20L,
+            maxCount = -1L)
     public BaseResponse<PictureVO> uploadPictureByUrl(
             @RequestBody PictureUploadRequest pictureUploadRequest,
             HttpServletRequest request) {
-        User loginUser = userApplicationService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         Space space = spaceFeignClient.getById(pictureUploadRequest.getSpaceId());
         SpaceUserAuthRequest spaceUserAuthRequest = new SpaceUserAuthRequest();
         spaceUserAuthRequest.setLoginUser(loginUser);
@@ -111,7 +116,7 @@ public class PictureController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userApplicationService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         Picture picture = pictureApplicationService.getById(deleteRequest.getId());
         Space space = spaceFeignClient.getById(picture.getSpaceId());
         SpaceUserAuthRequest spaceUserAuthRequest = new SpaceUserAuthRequest();
@@ -147,7 +152,7 @@ public class PictureController {
         Picture oldPicture = pictureApplicationService.getById(id);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
         // 补充审核参数
-        User loginUser = userApplicationService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         pictureApplicationService.fillReviewParams(oldPicture, loginUser);
         // 操作数据库
         boolean result = pictureApplicationService.updateById(picture);
@@ -210,7 +215,7 @@ public class PictureController {
             pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
             pictureQueryRequest.setNullSpaceId(true);
         } else {
-            User loginUser = userApplicationService.getLoginUser(request);
+            User loginUser = userFeignClient.getLoginUser(request);
             Space space = spaceFeignClient.getById(spaceId);
             SpaceUserAuthRequest spaceUserAuthRequest = new SpaceUserAuthRequest();
             spaceUserAuthRequest.setLoginUser(loginUser);
@@ -246,7 +251,7 @@ public class PictureController {
         if (pictureEditRequest == null || pictureEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userApplicationService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         Picture picture = pictureApplicationService.getById(pictureEditRequest.getId());
         Space space = spaceFeignClient.getById(picture.getSpaceId());
         SpaceUserAuthRequest spaceUserAuthRequest = new SpaceUserAuthRequest();
@@ -279,7 +284,7 @@ public class PictureController {
     public BaseResponse<Boolean> doPictureReview(@RequestBody PictureReviewRequest pictureReviewRequest,
                                                  HttpServletRequest request) {
         ThrowUtils.throwIf(pictureReviewRequest == null, ErrorCode.PARAMS_ERROR);
-        User loginUser = userApplicationService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         pictureApplicationService.doPictureReview(pictureReviewRequest, loginUser);
         return ResultUtils.success(true);
     }
@@ -292,7 +297,7 @@ public class PictureController {
     public BaseResponse<Integer> uploadPictureByBatch(@RequestBody PictureUploadByBatchRequest pictureUploadByBatchRequest,
                                                       HttpServletRequest request) {
         ThrowUtils.throwIf(pictureUploadByBatchRequest == null, ErrorCode.PARAMS_ERROR);
-        User loginUser = userApplicationService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         int uploadCount = pictureApplicationService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
         return ResultUtils.success(uploadCount);
     }
@@ -320,7 +325,7 @@ public class PictureController {
         ThrowUtils.throwIf(searchPictureByColorRequest == null, ErrorCode.PARAMS_ERROR);
         String picColor = searchPictureByColorRequest.getPicColor();
         Long spaceId = searchPictureByColorRequest.getSpaceId();
-        User loginUser = userApplicationService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         Space space = spaceFeignClient.getById(spaceId);
         SpaceUserAuthRequest spaceUserAuthRequest = new SpaceUserAuthRequest();
         spaceUserAuthRequest.setLoginUser(loginUser);
@@ -339,7 +344,7 @@ public class PictureController {
 //    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_EDIT)
     public BaseResponse<Boolean> editPictureByBatch(@RequestBody PictureEditByBatchRequest pictureEditByBatchRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(pictureEditByBatchRequest == null, ErrorCode.PARAMS_ERROR);
-        User loginUser = userApplicationService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
 
         Picture picture = pictureApplicationService.getById(pictureEditByBatchRequest.getSpaceId());
         Space space = spaceFeignClient.getById(picture.getSpaceId());
@@ -363,7 +368,7 @@ public class PictureController {
         if (createPictureOutPaintingTaskRequest == null || createPictureOutPaintingTaskRequest.getPictureId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userApplicationService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
 
         Picture picture = pictureApplicationService.getById(createPictureOutPaintingTaskRequest.getPictureId());
         Space space = spaceFeignClient.getById(picture.getSpaceId());

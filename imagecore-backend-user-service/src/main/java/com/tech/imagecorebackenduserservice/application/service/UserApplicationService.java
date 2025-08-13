@@ -109,4 +109,10 @@ public interface UserApplicationService {
     long saveUser(User userEntity);
 
     User getUserFromRequest(HttpServletRequest request);
+
+    void userScoreChange(Long userId, String scoreType, Long score);
+
+    Long getUserAddScoreCount(Long userId, String scoreType);
+
+    Boolean checkScore(Long userId, Long score);
 }

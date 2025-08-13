@@ -2,11 +2,13 @@ package com.tech.imagecorebackendpictureservice.interfaces.controller;
 
 
 
+import com.tech.imagecorebackendcommon.annotation.AddScore;
 import com.tech.imagecorebackendcommon.common.BaseResponse;
 import com.tech.imagecorebackendcommon.common.ResultUtils;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.picture.DoThumbRequest;
 import com.tech.imagecorebackendpictureservice.application.service.ThumbApplicationService;
+import com.tech.imagecorebackendmodel.user.constant.UseScoreConstant;
 import com.tech.imagecorebackendserviceclient.application.service.UserFeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +29,9 @@ public class ThumbController {
     private ThumbApplicationService thumbApplicationService;
 
     @PostMapping("/do")
+    @AddScore(type = UseScoreConstant.THUMBNAIL_PICTURE,
+            value = 5L,
+            maxCount = 6L)
     public BaseResponse<Boolean> doThumb(@RequestBody DoThumbRequest doThumbRequest, HttpServletRequest request) {
         User loginUser = userApplicationService.getLoginUser(request);
         Boolean success = thumbApplicationService.doThumb(doThumbRequest, loginUser);

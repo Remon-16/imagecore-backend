@@ -2,6 +2,8 @@ package com.tech.imagecorebackenduserservice.domain.user.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -9,16 +11,21 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import com.tech.imagecorebackendcommon.exception.BusinessException;
 import com.tech.imagecorebackendcommon.exception.ErrorCode;
+import com.tech.imagecorebackendcommon.exception.ThrowUtils;
+import com.tech.imagecorebackendcommon.utils.CacheUtils;
 import com.tech.imagecorebackendcommon.utils.JwtUtils;
 import com.tech.imagecorebackendmodel.dto.user.UserQueryRequest;
 import com.tech.imagecorebackendmodel.user.constant.UserConstant;
 import com.tech.imagecorebackendmodel.user.entity.User;
+import com.tech.imagecorebackendmodel.user.valueobject.UserRedisLuaScriptConstant;
 import com.tech.imagecorebackendmodel.user.valueobject.UserRoleEnum;
 import com.tech.imagecorebackendmodel.vo.user.LoginUserVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
 import com.tech.imagecorebackenduserservice.domain.user.repository.UserRepository;
 import com.tech.imagecorebackenduserservice.domain.user.service.UserDomainService;
+import com.tech.imagecorebackenduserservice.infrastructure.dco.UserCacheHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -39,6 +46,18 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Resource
     private UserRepository userRepository;
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Resource
+    UserCacheHandler userCacheHandler;
+
+    private String getTimeSlice() {
+        DateTime nowDate = DateUtil.date();
+        // 获取到当前时间前最近的整数秒，比如当前 11:20:23 ，获取到 11:20:20
+        return DateUtil.format(nowDate, "HH:mm:") + (DateUtil.second(nowDate) / 10) * 10;
+    }
 
     /**
      * 用户注册
@@ -254,6 +273,45 @@ public class UserDomainServiceImpl implements UserDomainService {
     @Override
     public boolean saveUser(User userEntity) {
         return userRepository.save(userEntity);
+    }
+
+    @Override
+    public void userScoreChange(Long userId, String scoreType, Long score) {
+        ThrowUtils.throwIf(userId == null, ErrorCode.PARAMS_ERROR, "用户为空");
+        ThrowUtils.throwIf(score == null, ErrorCode.PARAMS_ERROR, "积分为空");
+        String timeSlice = getTimeSlice();
+        String userTempScoreKey = UserCacheHandler.getRedisKey(CacheUtils.getUserTempScoreCacheKey(userId.toString(), timeSlice));
+        String userScoreKey = UserCacheHandler.getRedisKey(CacheUtils.getUserScoreCacheKey(userId.toString()));
+
+        String userScoreType = scoreType != null ?
+                UserCacheHandler.getRedisKey(CacheUtils.getUserScoreCountKey(scoreType, userId.toString())) : "deduct";
+
+        // 执行 Lua 脚本
+        long result = redisTemplate.execute(
+                UserRedisLuaScriptConstant.SCORE_HANDLE_SCRIPT,
+                Arrays.asList(userTempScoreKey, userScoreKey, userScoreType),
+                userId,
+                score
+        );
+
+    }
+
+    @Override
+    public Long getUserAddScoreCount(Long userId, String scoreType) {
+        String scoreAddCountKey = CacheUtils.getUserScoreCountKey(scoreType, userId.toString());
+        return userCacheHandler.getUserAddScoreCount(scoreAddCountKey);
+    }
+
+    @Override
+    public Boolean checkScore(Long userId, Long score) {
+        // 查缓存
+        String userScoreKey = CacheUtils.getUserScoreCacheKey(userId.toString());
+        Long userScore = userCacheHandler.getUserCore(userScoreKey);
+        // 缓存没有，查数据库
+        if (userScore == null) {
+            userScore = userRepository.getById(userId).getUserScore();
+        }
+        return userScore >= score;
     }
 }
 

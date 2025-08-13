@@ -68,6 +68,18 @@ public class User implements Serializable {
      * 更新时间
      */
     private Date updateTime;
+    /**
+     * 用户积分余额
+     */
+    private Long userScore;
+    /**
+     * 会员到期时间
+     */
+    private Date vipExpiry;
+    /**
+     * 会员类型
+     */
+    private String vipType;
 
     /**
      * 是否删除

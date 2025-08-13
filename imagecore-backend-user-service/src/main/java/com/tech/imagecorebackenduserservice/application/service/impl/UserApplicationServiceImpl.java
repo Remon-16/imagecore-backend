@@ -182,6 +182,21 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return userEntity.getId();
     }
+
+    @Override
+    public void userScoreChange(Long userId, String scoreType, Long score) {
+        userDomainService.userScoreChange(userId, scoreType, score);
+    }
+
+    @Override
+    public Long getUserAddScoreCount(Long userId, String scoreType) {
+        return userDomainService.getUserAddScoreCount(userId, scoreType);
+    }
+
+    @Override
+    public Boolean checkScore(Long userId, Long score) {
+        return userDomainService.checkScore(userId, score);
+    }
 }
 
 

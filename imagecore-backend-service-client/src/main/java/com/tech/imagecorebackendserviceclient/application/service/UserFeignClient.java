@@ -4,12 +4,15 @@ package com.tech.imagecorebackendserviceclient.application.service;
 
 import com.tech.imagecorebackendcommon.exception.BusinessException;
 import com.tech.imagecorebackendcommon.exception.ErrorCode;
+import com.tech.imagecorebackendmodel.dto.user.UserScoreRequest;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
@@ -93,4 +96,13 @@ public interface UserFeignClient {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "用户信息格式错误");
         }
     }
+
+    @PostMapping("/score/change")
+    void userScoreChange(@RequestBody UserScoreRequest userScoreRequest);
+
+    @PostMapping("/score/useCount")
+    Long getUserAddScoreCount(@RequestBody UserScoreRequest userScoreRequest);
+
+    @PostMapping("/score/checkScore")
+    Boolean checkScore(@RequestBody UserScoreRequest userScoreRequest);
 }
