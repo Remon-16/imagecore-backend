@@ -5,6 +5,7 @@ package com.tech.imagecorebackendserviceclient.application.service;
 import com.tech.imagecorebackendcommon.exception.BusinessException;
 import com.tech.imagecorebackendcommon.exception.ErrorCode;
 import com.tech.imagecorebackendmodel.dto.user.UserScoreRequest;
+import com.tech.imagecorebackendmodel.user.entity.ScoreUser;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
 import org.apache.commons.lang3.StringUtils;
@@ -109,4 +110,7 @@ public interface UserFeignClient {
 
     @PostMapping("/score/batchUpdateScore")
     void batchUpdateScore(@RequestBody Map<Long, Long> scoreMap);
+
+    @PostMapping("/scoreUser/saveBatch")
+    void saveBatch(List<ScoreUser> scoreUserList);
 }

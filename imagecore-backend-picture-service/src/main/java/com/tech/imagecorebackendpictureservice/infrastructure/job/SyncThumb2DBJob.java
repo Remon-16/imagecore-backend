@@ -12,7 +12,6 @@ import com.tech.imagecorebackendmodel.picture.entity.Thumb;
 import com.tech.imagecorebackendmodel.picture.valueobject.ThumbTypeEnum;
 import com.tech.imagecorebackendpictureservice.domain.picture.service.ThumbDomainService;
 import com.tech.imagecorebackendpictureservice.infrastructure.mapper.PictureMapper;
-import com.tech.imagecorebackendserviceclient.application.service.ScoreUserFeignClient;
 import com.tech.imagecorebackendserviceclient.application.service.UserFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -38,8 +37,7 @@ public class SyncThumb2DBJob {
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
-    @Resource
-    private ScoreUserFeignClient scoreUserFeignClient;
+
     @Resource
     private UserFeignClient userFeignClient;
 
@@ -134,7 +132,7 @@ public class SyncThumb2DBJob {
             scoreUser.setScoreAmount(curScore);
             scoreUserList.add(scoreUser);
         }
-        scoreUserFeignClient.saveBatch(scoreUserList);
+        userFeignClient.saveBatch(scoreUserList);
         // 批量更新用户积分余额
         if (!userScoreChangeMap.isEmpty()) {
             userFeignClient.batchUpdateScore(userScoreChangeMap);

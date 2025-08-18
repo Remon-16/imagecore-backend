@@ -20,6 +20,8 @@ import reactor.core.publisher.Mono;
 import jakarta.annotation.Resource;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Component
@@ -32,7 +34,7 @@ public class GlobalAuthFilter implements GlobalFilter, Ordered {
     // 不需要验证token的路径
     private static final String[] WHITE_LIST = {
             "/api/user/login",
-            "/api/user/get/login",
+//            "/api/user/get/login",
             "/api/user/register",
             "/api/user/logout",
             "/api/doc.html",
@@ -40,8 +42,19 @@ public class GlobalAuthFilter implements GlobalFilter, Ordered {
             "/api/v2/api-docs",
             "/api/swagger-resources",
             "/api/swagger-ui.html",
+            "/api/picture/tag_category",
+//            "/api/picture/list/page/vo",
+//            "/api/picture/list/page/vo/cache",
             "/api/webjars/**"
     };
+
+    private static final Map<String, String> IGNORE_LOGINS = new HashMap<>();
+
+    static {
+        IGNORE_LOGINS.put("/api/picture/list/page/vo", "/api/picture/list/page/vo");
+        IGNORE_LOGINS.put("/api/picture/list/page/vo/cache", "/api/picture/list/page/vo/cache");
+        IGNORE_LOGINS.put("/api/user/get/login", "/api/user/get/login");
+    }
     /**
      * 判断是否为白名单路径
      * @param path 请求路径
@@ -102,6 +115,11 @@ public class GlobalAuthFilter implements GlobalFilter, Ordered {
         }
         // 统一权限校验，通过 JWT 获取登录用户信息
         String token = serverHttpRequest.getHeaders().getFirst(JwtUtils.JWT_HEADER);
+
+        // 放过不需要强制拥有登录态的方法
+        if (StringUtils.isBlank(token) && IGNORE_LOGINS.containsKey(path)){
+            return chain.filter(exchange);
+        }
 
         // 如果请求头中没有token
         if (StringUtils.isBlank(token)) {

@@ -6,9 +6,11 @@ import jakarta.annotation.Resource;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
+@Component
 public class UserCacheHandler {
 
     @Resource

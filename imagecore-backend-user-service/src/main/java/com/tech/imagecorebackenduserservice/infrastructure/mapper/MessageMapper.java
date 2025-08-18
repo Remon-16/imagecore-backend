@@ -2,6 +2,7 @@ package com.tech.imagecorebackenduserservice.infrastructure.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.tech.imagecorebackendmodel.user.entity.Message;
+import org.apache.ibatis.annotations.Param;
 
 
 /**
@@ -11,7 +12,7 @@ import com.tech.imagecorebackendmodel.user.entity.Message;
 * @Entity com.tech.imagocorebackend.domain.user.entity.Message
 */
 public interface MessageMapper extends BaseMapper<Message> {
-
+    void updateReadByUser(@Param("userId") Long userId, @Param("messageStatus") String messageStatus);
 }
 
 

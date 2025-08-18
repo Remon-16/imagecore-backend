@@ -16,6 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>3.2.4</spring-boot.version>
+        <maven.compiler.parameters>true</maven.compiler.parameters>
     </properties>
     <dependencies>
         <dependency>
@@ -54,8 +55,8 @@
         <!-- 接口文档：https://doc.xiaominfo.com/docs/quick-start#spring-boot-2-->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
-            <version>4.3.0</version>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+            <version>4.4.0</version>
         </dependency>
     </dependencies>
     <dependencyManagement>

@@ -1,5 +1,6 @@
 package com.tech.imagecorebackendspaceservice;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -15,6 +16,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableFeignClients(basePackages = {"com.tech.imagecorebackendserviceclient.application.service"})
 @EnableAsync
 @EnableScheduling
+@MapperScan("com.tech.imagecorebackendspaceservice.infrastructure.mapper")
 @EnableAspectJAutoProxy(exposeProxy = true)
 public class ImagecoreBackendSpaceServiceApplication {
 

@@ -6,7 +6,7 @@ import com.tech.imagecorebackendcommon.annotation.AddScore;
 import com.tech.imagecorebackendcommon.common.BaseResponse;
 import com.tech.imagecorebackendcommon.common.ResultUtils;
 import com.tech.imagecorebackendmodel.user.entity.User;
-import com.tech.imagecorebackendmodel.vo.picture.DoThumbRequest;
+import com.tech.imagecorebackendmodel.dto.picture.DoThumbRequest;
 import com.tech.imagecorebackendpictureservice.application.service.ThumbApplicationService;
 import com.tech.imagecorebackendmodel.user.constant.UseScoreConstant;
 import com.tech.imagecorebackendserviceclient.application.service.UserFeignClient;

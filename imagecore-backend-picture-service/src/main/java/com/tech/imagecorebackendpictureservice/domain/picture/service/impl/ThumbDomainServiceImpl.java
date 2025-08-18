@@ -13,7 +13,7 @@ import com.tech.imagecorebackendmodel.picture.valueobject.RedisLuaScriptConstant
 import com.tech.imagecorebackendmodel.picture.valueobject.ThumbConstant;
 import com.tech.imagecorebackendmodel.picture.valueobject.ThumbTypeEnum;
 import com.tech.imagecorebackendmodel.user.entity.User;
-import com.tech.imagecorebackendmodel.vo.picture.DoThumbRequest;
+import com.tech.imagecorebackendmodel.dto.picture.DoThumbRequest;
 import com.tech.imagecorebackendmodel.vo.picture.PictureVO;
 import com.tech.imagecorebackendpictureservice.domain.picture.service.ThumbDomainService;
 import com.tech.imagecorebackendpictureservice.infrastructure.dco.CacheManager;

@@ -2,7 +2,7 @@ package com.tech.imagecorebackendpictureservice.application.service.impl;
 
 
 import com.tech.imagecorebackendmodel.user.entity.User;
-import com.tech.imagecorebackendmodel.vo.picture.DoThumbRequest;
+import com.tech.imagecorebackendmodel.dto.picture.DoThumbRequest;
 import com.tech.imagecorebackendpictureservice.application.service.ThumbApplicationService;
 import com.tech.imagecorebackendpictureservice.domain.picture.service.ThumbDomainService;
 import org.springframework.stereotype.Service;

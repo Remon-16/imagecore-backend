@@ -17,6 +17,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>3.2.4</spring-boot.version>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
+        <maven.compiler.parameters>true</maven.compiler.parameters>
     </properties>
     <dependencies>
         <dependency>

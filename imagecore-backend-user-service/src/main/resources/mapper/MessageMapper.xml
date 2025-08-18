@@ -21,4 +21,10 @@
         id,userId,content,messageType,messageState,senderId,
         createTime,editTime,updateTime,isDelete
     </sql>
+
+    <update id="updateReadByUser">
+        UPDATE message
+        SET messageState = #{messageStatus}
+        WHERE userId = #{userId}
+    </update>
 </mapper>

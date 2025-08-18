@@ -1,4 +1,4 @@
-package com.tech.imagecorebackendmodel.vo.picture;
+package com.tech.imagecorebackendmodel.dto.picture;
 
 import lombok.Data;
 

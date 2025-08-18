@@ -1,5 +1,5 @@
 server:
-  port: 8101
+  port: 8102
   servlet:
     context-path: /api/space
     # cookie 30 天过期
