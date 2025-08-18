@@ -6,6 +6,8 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.StrPool;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tech.imagecorebackendcommon.utils.CacheUtils;
+import com.tech.imagecorebackendmodel.picture.entity.Picture;
+import com.tech.imagecorebackendmodel.user.constant.UserScoreConstant;
 import com.tech.imagecorebackendmodel.user.entity.ScoreUser;
 import com.tech.imagecorebackendpictureservice.infrastructure.dco.RedisKeyUtil;
 import com.tech.imagecorebackendmodel.picture.entity.Thumb;
@@ -100,9 +102,29 @@ public class SyncThumb2DBJob {
         if (needRemove) {
             thumbDomainService.remove(wrapper);
         }
-        // 批量更新图片点赞量
+        // 批量更新图片点赞量，增加被点赞的用户积分
         if (!pictureThumbCountMap.isEmpty()) {
             pictureMapper.batchUpdateThumbCount(pictureThumbCountMap);
+            List<Picture> pictureList = pictureMapper.selectByIds(pictureThumbCountMap.keySet());
+            List<ScoreUser> scoreUserList = new ArrayList<>();
+            Map<Long, Long> userScoreChangeMap = new HashMap<>();
+            for (Picture picture : pictureList) {
+                Long curScore = UserScoreConstant.BETHUMBNAIL_PICTURE_VALUE;
+                ScoreUser scoreUser = new ScoreUser();
+                scoreUser.setUserId(picture.getUserId());
+                scoreUser.setScoreAmount(curScore);
+                scoreUser.setScoreType(UserScoreConstant.BETHUMBNAIL_PICTURE);
+                scoreUserList.add(scoreUser);
+
+                Long userId = picture.getUserId();
+                Long oldScore = userScoreChangeMap.getOrDefault(userId, 0L);
+                userScoreChangeMap.put(userId, oldScore + curScore);
+            }
+            userFeignClient.saveBatch(scoreUserList);
+            // 批量更新用户积分余额
+            if (!userScoreChangeMap.isEmpty()) {
+                userFeignClient.batchUpdateScore(userScoreChangeMap);
+            }
         }
         redisTemplate.delete(tempThumbKey);
     }

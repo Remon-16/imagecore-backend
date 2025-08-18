@@ -8,7 +8,7 @@ import com.tech.imagecorebackendcommon.common.ResultUtils;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.dto.picture.DoThumbRequest;
 import com.tech.imagecorebackendpictureservice.application.service.ThumbApplicationService;
-import com.tech.imagecorebackendmodel.user.constant.UseScoreConstant;
+import com.tech.imagecorebackendmodel.user.constant.UserScoreConstant;
 import com.tech.imagecorebackendserviceclient.application.service.UserFeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +29,7 @@ public class ThumbController {
     private ThumbApplicationService thumbApplicationService;
 
     @PostMapping("/do")
-    @AddScore(type = UseScoreConstant.THUMBNAIL_PICTURE,
+    @AddScore(type = UserScoreConstant.THUMBNAIL_PICTURE,
             value = 5L,
             maxCount = 6L)
     public BaseResponse<Boolean> doThumb(@RequestBody DoThumbRequest doThumbRequest, HttpServletRequest request) {

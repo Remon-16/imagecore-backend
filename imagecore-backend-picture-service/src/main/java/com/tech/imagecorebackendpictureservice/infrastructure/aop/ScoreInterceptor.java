@@ -5,7 +5,7 @@ import com.tech.imagecorebackendcommon.annotation.DeductScore;
 import com.tech.imagecorebackendcommon.exception.BusinessException;
 import com.tech.imagecorebackendcommon.exception.ErrorCode;
 import com.tech.imagecorebackendmodel.dto.user.UserScoreRequest;
-import com.tech.imagecorebackendmodel.user.constant.UseScoreConstant;
+import com.tech.imagecorebackendmodel.user.constant.UserScoreConstant;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendserviceclient.application.service.UserFeignClient;
 import jakarta.annotation.Resource;
@@ -55,7 +55,7 @@ public class ScoreInterceptor {
             String lock = String.valueOf(loginUser.getId()).intern();
             synchronized (lock) {
                 Long curScoreCount = userFeignClient.getUserAddScoreCount(userScoreRequest);
-                if(UseScoreConstant.NO_LIMITATION.equals(maxCount) ||curScoreCount < maxCount){
+                if(UserScoreConstant.NO_LIMITATION.equals(maxCount) ||curScoreCount < maxCount){
                     userScoreRequest.setScore(score);
                     userFeignClient.userScoreChange(userScoreRequest);
                     log.info("增加积分成功: 用户={}, 积分={}, 类型={}", loginUser.getId(), score, type);
@@ -86,7 +86,7 @@ public class ScoreInterceptor {
         userScoreRequest.setScoreType(type);
         userScoreRequest.setUserId(loginUser.getId());
         Long curScoreCount = userFeignClient.getUserAddScoreCount(userScoreRequest);
-        if(!(curScoreCount < maxCount) && !UseScoreConstant.NO_LIMITATION.equals(maxCount)){
+        if(!(curScoreCount < maxCount) && !UserScoreConstant.NO_LIMITATION.equals(maxCount)){
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "今日次数已到上限");
         }
 

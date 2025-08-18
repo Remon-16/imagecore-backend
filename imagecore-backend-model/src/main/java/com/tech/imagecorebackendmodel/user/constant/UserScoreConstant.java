@@ -1,6 +1,6 @@
 package com.tech.imagecorebackendmodel.user.constant;
 
-public interface UseScoreConstant {
+public interface UserScoreConstant {
 
     String UPLOAD_PICTURE = "uploadPic";
     String DOWNLOAD_PICTURE = "downloadPic";
@@ -12,6 +12,8 @@ public interface UseScoreConstant {
     String QUARTER_VIP = "quarterVIP";
     String HALF_YEAR_VIP = "halfYearVIP";
     String YEAR_VIP = "yearVIP";
+
+    Long BETHUMBNAIL_PICTURE_VALUE = 10L;
 
     Long NO_LIMITATION = -1L;
 

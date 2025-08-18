@@ -27,7 +27,7 @@ import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.picture.PictureTagCategory;
 import com.tech.imagecorebackendmodel.vo.picture.PictureVO;
 import com.tech.imagecorebackendpictureservice.application.service.PictureApplicationService;
-import com.tech.imagecorebackendmodel.user.constant.UseScoreConstant;
+import com.tech.imagecorebackendmodel.user.constant.UserScoreConstant;
 import com.tech.imagecorebackendpictureservice.interfaces.assembler.PictureAssembler;
 import com.tech.imagecorebackendserviceclient.application.service.SpaceFeignClient;
 import com.tech.imagecorebackendserviceclient.application.service.UserFeignClient;
@@ -65,7 +65,7 @@ public class PictureController {
      * 上传图片（可重新上传）
      */
     @PostMapping("/upload")
-    @AddScore(type = UseScoreConstant.UPLOAD_PICTURE,
+    @AddScore(type = UserScoreConstant.UPLOAD_PICTURE,
             value = 20L,
             maxCount = -1L)
     public BaseResponse<PictureVO> uploadPicture(
@@ -90,7 +90,7 @@ public class PictureController {
      * 通过 URL 上传图片（可重新上传）
      */
     @PostMapping("/upload/url")
-    @AddScore(type = UseScoreConstant.UPLOAD_PICTURE,
+    @AddScore(type = UserScoreConstant.UPLOAD_PICTURE,
             value = 20L,
             maxCount = -1L)
     public BaseResponse<PictureVO> uploadPictureByUrl(
