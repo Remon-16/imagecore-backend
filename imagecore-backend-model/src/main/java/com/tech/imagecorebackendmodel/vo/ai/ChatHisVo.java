@@ -1,6 +1,8 @@
-package com.tech.imagecorebackendpictureservice.infrastructure.ai.vo;
+package com.tech.imagecorebackendmodel.vo.ai;
 
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Data
 public class ChatHisVo {
@@ -14,4 +16,6 @@ public class ChatHisVo {
     private String chatType;
 
     private String timestamp;
+
+    private LocalDateTime createTime;
 }

@@ -204,6 +204,11 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     public void batchUpdateScore(Map<Long, Long> scoreMap) {
         userDomainService.batchUpdateScore(scoreMap);
     }
+
+    @Override
+    public void userSubscribesVip(User user) {
+        userDomainService.userSubscribesVip(user);
+    }
 }
 
 

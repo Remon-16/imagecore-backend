@@ -1,4 +1,4 @@
-package com.tech.imagecorebackendpictureservice.infrastructure.ai.enums;
+package com.tech.imagecorebackendmodel.ai.valueobject;
 
 
 import com.tech.imagecorebackendcommon.exception.BusinessException;

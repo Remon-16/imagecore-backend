@@ -26,6 +26,8 @@ import com.tech.imagecorebackendmodel.vo.picture.PictureVO;
 import com.tech.imagecorebackendmodel.vo.space.analyze.SpaceCategoryAnalyzeResponse;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.model.CreatePictureOutPaintingTaskRequest;
+import com.tech.imagecorebackendpictureservice.api.aliyunai.model.Text2ImageTaskRequest;
+import com.tech.imagecorebackendpictureservice.api.aliyunai.model.Text2ImageTaskResponse;
 import com.tech.imagecorebackendpictureservice.application.service.PictureApplicationService;
 import com.tech.imagecorebackendpictureservice.domain.picture.service.PictureDomainService;
 import com.tech.imagecorebackendpictureservice.domain.picture.service.ThumbDomainService;
@@ -444,5 +446,10 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
 
         // 查询并封装结果
         return this.getBaseMapper().selectMaps(queryWrapper);
+    }
+
+    @Override
+    public Text2ImageTaskResponse createText2ImageTask(Text2ImageTaskRequest text2ImageTaskRequest) {
+        return pictureDomainService.createText2ImageTask(text2ImageTaskRequest);
     }
 }

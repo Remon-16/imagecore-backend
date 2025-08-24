@@ -7,6 +7,8 @@ import com.tech.imagecorebackendmodel.picture.entity.Picture;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.picture.PictureVO;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.model.CreatePictureOutPaintingTaskRequest;
+import com.tech.imagecorebackendpictureservice.api.aliyunai.model.Text2ImageTaskRequest;
+import com.tech.imagecorebackendpictureservice.api.aliyunai.model.Text2ImageTaskResponse;
 
 import java.util.List;
 
@@ -120,4 +122,11 @@ public interface PictureDomainService {
      * @param loginUser
      */
     CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest, User loginUser);
+
+    /**
+     * 文生图接口
+     * @param text2ImageTaskRequest
+     * @return
+     */
+    Text2ImageTaskResponse createText2ImageTask(Text2ImageTaskRequest text2ImageTaskRequest);
 }

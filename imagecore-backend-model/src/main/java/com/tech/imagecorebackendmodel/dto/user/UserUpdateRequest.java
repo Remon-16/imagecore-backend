@@ -3,6 +3,7 @@ package com.tech.imagecorebackendmodel.dto.user;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 更新用户请求
@@ -29,6 +30,15 @@ public class UserUpdateRequest implements Serializable {
      * 简介
      */
     private String userProfile;
+
+    /**
+     * 会员到期时间
+     */
+    private Date vipExpiry;
+    /**
+     * 会员类型
+     */
+    private String vipType;
 
     /**
      * 用户角色：user/admin

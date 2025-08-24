@@ -1,6 +1,7 @@
-package com.tech.imagecorebackendpictureservice.infrastructure.ai.advisor;
+package com.tech.imagecorebackenduserservice.infrastructure.ai.advisor;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.ai.chat.client.ChatClientMessageAggregator;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;

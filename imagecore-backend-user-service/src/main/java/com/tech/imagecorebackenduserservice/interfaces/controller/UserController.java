@@ -2,6 +2,7 @@ package com.tech.imagecorebackenduserservice.interfaces.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tech.imagecorebackendcommon.annotation.AuthCheck;
+import com.tech.imagecorebackendcommon.annotation.DeductScore;
 import com.tech.imagecorebackendcommon.common.BaseResponse;
 import com.tech.imagecorebackendcommon.common.DeleteRequest;
 import com.tech.imagecorebackendcommon.common.ResultUtils;
@@ -10,6 +11,7 @@ import com.tech.imagecorebackendcommon.exception.ErrorCode;
 import com.tech.imagecorebackendcommon.exception.ThrowUtils;
 import com.tech.imagecorebackendmodel.dto.user.*;
 import com.tech.imagecorebackendmodel.user.constant.UserConstant;
+import com.tech.imagecorebackendmodel.user.constant.UserScoreConstant;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.user.LoginUserVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
@@ -137,5 +139,17 @@ public class UserController {
     public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest) {
         ThrowUtils.throwIf(userQueryRequest == null, ErrorCode.PARAMS_ERROR);
         return ResultUtils.success(userApplicationService.listUserVOByPage(userQueryRequest));
+    }
+
+    @DeductScore(type = UserScoreConstant.MONTH_VIP,
+            value = -30L,
+            maxCount = -1L)
+    @PostMapping("/userSubscribesVip")
+    public BaseResponse<Boolean> userSubscribesVip(@RequestBody UserUpdateRequest userUpdateRequest){
+        User user = new User();
+        user.setId(userUpdateRequest.getId());
+        user.setVipType(userUpdateRequest.getVipType());
+        userApplicationService.updateUser(user);
+        return ResultUtils.success(true);
     }
 }

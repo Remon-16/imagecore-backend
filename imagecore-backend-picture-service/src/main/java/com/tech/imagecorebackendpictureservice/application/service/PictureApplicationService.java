@@ -12,6 +12,8 @@ import com.tech.imagecorebackendmodel.vo.picture.PictureVO;
 import com.tech.imagecorebackendmodel.vo.space.analyze.SpaceCategoryAnalyzeResponse;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.model.CreatePictureOutPaintingTaskRequest;
 
+import com.tech.imagecorebackendpictureservice.api.aliyunai.model.Text2ImageTaskRequest;
+import com.tech.imagecorebackendpictureservice.api.aliyunai.model.Text2ImageTaskResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
@@ -174,4 +176,11 @@ public interface PictureApplicationService extends IService<Picture> {
     List<Long> getPicSizeList(SpaceSizeAnalyzeRequest spaceSizeAnalyzeRequest);
 
     List<Map<String, Object>> querySpaceUserAnalyze(SpaceUserAnalyzeRequest spaceUserAnalyzeRequest);
+
+    /**
+     * 文生图接口
+     * @param text2ImageTaskRequest
+     * @return
+     */
+    Text2ImageTaskResponse createText2ImageTask(Text2ImageTaskRequest text2ImageTaskRequest);
 }

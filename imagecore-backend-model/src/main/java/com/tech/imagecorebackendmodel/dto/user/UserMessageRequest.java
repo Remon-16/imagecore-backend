@@ -9,5 +9,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class UserMessageRequest extends PageRequest {
     Long userId;
+    Long messageId;
     String messageType;
+    String messageStatus;
 }

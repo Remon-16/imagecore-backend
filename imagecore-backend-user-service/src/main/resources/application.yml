@@ -9,6 +9,13 @@ server:
 spring:
   application:
     name: imagecore-backend-user-service
+  # 大模型配置
+  ai:
+    dashscope:
+      api-key: your-api-key
+      chat:
+        options:
+          model: qwen-plus
   cloud:
     nacos:
       discovery:
@@ -42,14 +49,19 @@ mybatis-plus:
       logic-delete-field: isDelete # 全局逻辑删除的实体字段名
       logic-delete-value: 1 # 逻辑已删除值（默认为 1）
       logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
-# 接口文档配置
+# springdoc-openapi
+springdoc:
+  group-configs:
+    - group: 'default'
+      packages-to-scan: com.tech.imagecorebackenduserservice.interfaces.controller
+# knife4j
 knife4j:
   enable: true
-  openapi:
-    title: 接口文档
-    version: 1.0
-    group:
-      default:
-        api-rule: package
-        api-rule-resources:
-          - com.tech.imagecorebackenduserservice.interfaces.controller
+  setting:
+    language: zh_cn
+
+## 阿里云 AI 配置
+#aliYunAi:
+#  apiKey: xxx
+#  ragName: yyy
+

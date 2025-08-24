@@ -1,6 +1,8 @@
-package com.tech.imagecorebackendpictureservice.infrastructure.ai.dto;
+package com.tech.imagecorebackendmodel.dto.ai;
 
 import lombok.Data;
+
+import java.sql.Timestamp;
 
 @Data
 public class ChatRequest {
@@ -21,4 +23,9 @@ public class ChatRequest {
      * 对话类型
      */
     private String chatType;
+
+    /**
+     * 最新的时间戳
+     */
+    private Timestamp lastTimestamp;
 }

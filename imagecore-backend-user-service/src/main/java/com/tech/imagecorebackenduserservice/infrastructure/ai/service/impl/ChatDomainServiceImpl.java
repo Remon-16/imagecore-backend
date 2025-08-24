@@ -1,16 +1,19 @@
-package com.tech.imagecorebackendpictureservice.infrastructure.ai.service;
+package com.tech.imagecorebackenduserservice.infrastructure.ai.service.impl;
 
 
 import com.tech.imagecorebackendcommon.exception.BusinessException;
 import com.tech.imagecorebackendcommon.exception.ErrorCode;
-import com.tech.imagecorebackendpictureservice.infrastructure.ai.app.CSChatApp;
-import com.tech.imagecorebackendpictureservice.infrastructure.ai.app.DrawChatApp;
-import com.tech.imagecorebackendpictureservice.infrastructure.ai.dto.ChatRequest;
-import com.tech.imagecorebackendpictureservice.infrastructure.ai.enums.ChatTypeEnum;
+import com.tech.imagecorebackenduserservice.infrastructure.ai.app.CSChatApp;
+import com.tech.imagecorebackenduserservice.infrastructure.ai.app.DrawChatApp;
+import com.tech.imagecorebackendmodel.dto.ai.ChatRequest;
+import com.tech.imagecorebackendmodel.ai.valueobject.ChatTypeEnum;
+import com.tech.imagecorebackenduserservice.infrastructure.ai.service.ChatDomainService;
 import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-public class ChatService {
+@Service
+public class ChatDomainServiceImpl implements ChatDomainService {
     /**
      * 客服对话
      */
@@ -22,10 +25,9 @@ public class ChatService {
     @Resource
     private DrawChatApp drawChatApp;
 
+    @Override
     public Flux<String> doChatStreamService(ChatRequest chatRequest){
 
-        // TODO 判断用户是否为会员
-        // TODO 如果不是，需要扣除积分，积分不足就报错
         String chatType = chatRequest.getChatType();
         ChatTypeEnum.isEnumValue(chatType);
         if (chatType.equals(ChatTypeEnum.CS.name())){

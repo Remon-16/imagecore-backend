@@ -4,10 +4,9 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tech.imagecorebackendcommon.annotation.AddScore;
 import com.tech.imagecorebackendcommon.annotation.AuthCheck;
+import com.tech.imagecorebackendcommon.annotation.DeductScore;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.AliYunAiApi;
-import com.tech.imagecorebackendpictureservice.api.aliyunai.model.CreateOutPaintingTaskResponse;
-import com.tech.imagecorebackendpictureservice.api.aliyunai.model.CreatePictureOutPaintingTaskRequest;
-import com.tech.imagecorebackendpictureservice.api.aliyunai.model.GetOutPaintingTaskResponse;
+import com.tech.imagecorebackendpictureservice.api.aliyunai.model.*;
 import com.tech.imagecorebackendpictureservice.api.imagesearch.ImageSearchApiFacade;
 import com.tech.imagecorebackendpictureservice.api.imagesearch.model.ImageSearchResult;
 import com.tech.imagecorebackendcommon.common.BaseResponse;
@@ -390,5 +389,21 @@ public class PictureController {
         ThrowUtils.throwIf(StrUtil.isBlank(taskId), ErrorCode.PARAMS_ERROR);
         GetOutPaintingTaskResponse task = aliYunAiApi.getOutPaintingTask(taskId);
         return ResultUtils.success(task);
+    }
+
+    /**
+     * 文生图任务
+     * @return
+     */
+    @DeductScore(type = UserScoreConstant.TEXT_TO_IMAGE,
+            value = -10L,
+            maxCount = 10L)
+    @PostMapping("/text_gen/create_task")
+    public BaseResponse<Text2ImageTaskResponse> createPictureByText(Text2ImageTaskRequest text2ImageTaskRequest, HttpServletRequest request) {
+        if (text2ImageTaskRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Text2ImageTaskResponse text2ImageTaskResponse = pictureApplicationService.createText2ImageTask(text2ImageTaskRequest);
+        return ResultUtils.success(text2ImageTaskResponse);
     }
 }

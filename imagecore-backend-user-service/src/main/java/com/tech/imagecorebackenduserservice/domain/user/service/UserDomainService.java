@@ -115,4 +115,10 @@ public interface UserDomainService {
     Boolean checkScore(Long userId, Long score);
 
     void batchUpdateScore(Map<Long, Long> scoreMap);
+
+    /**
+     * 用户开通会员
+     * @param user
+     */
+    void userSubscribesVip(User user);
 }

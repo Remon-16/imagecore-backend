@@ -1,4 +1,4 @@
-package com.tech.imagecorebackendpictureservice.infrastructure.ai.rag;
+package com.tech.imagecorebackenduserservice.infrastructure.ai.rag;
 
 
 import com.alibaba.cloud.ai.dashscope.api.DashScopeApi;

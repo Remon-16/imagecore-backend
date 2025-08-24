@@ -8,8 +8,8 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tech.imagecorebackendpictureservice.api.CosManager;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.AliYunAiApi;
-import com.tech.imagecorebackendpictureservice.api.aliyunai.model.CreateOutPaintingTaskRequest;
-import com.tech.imagecorebackendpictureservice.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import com.tech.imagecorebackendpictureservice.api.aliyunai.Text2ImageApi;
+import com.tech.imagecorebackendpictureservice.api.aliyunai.model.*;
 import com.tech.imagecorebackendcommon.exception.BusinessException;
 import com.tech.imagecorebackendcommon.exception.ErrorCode;
 import com.tech.imagecorebackendcommon.exception.ThrowUtils;
@@ -23,7 +23,6 @@ import com.tech.imagecorebackendmodel.picture.valueobject.PictureReviewStatusEnu
 import com.tech.imagecorebackendmodel.space.entity.Space;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.picture.PictureVO;
-import com.tech.imagecorebackendpictureservice.api.aliyunai.model.CreatePictureOutPaintingTaskRequest;
 import com.tech.imagecorebackendpictureservice.domain.picture.repository.PictureRepository;
 import com.tech.imagecorebackendpictureservice.domain.picture.service.PictureDomainService;
 import com.tech.imagecorebackendpictureservice.infrastructure.manager.upload.FilePictureUpload;
@@ -78,6 +77,9 @@ public class PictureDomainServiceImpl
 
     @Resource
     private AliYunAiApi aliYunAiApi;
+
+    @Resource
+    private Text2ImageApi text2ImageApi;
 
     @Override
     public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser) {
@@ -577,6 +579,11 @@ public class PictureDomainServiceImpl
             log.error("名称解析错误", e);
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "名称解析错误");
         }
+    }
+
+    @Override
+    public Text2ImageTaskResponse createText2ImageTask(Text2ImageTaskRequest text2ImageTaskRequest) {
+        return text2ImageApi.createText2ImageTask(text2ImageTaskRequest);
     }
 }
 

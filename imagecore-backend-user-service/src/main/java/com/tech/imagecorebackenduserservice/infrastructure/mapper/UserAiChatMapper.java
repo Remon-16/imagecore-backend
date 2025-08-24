@@ -1,9 +1,11 @@
 package com.tech.imagecorebackenduserservice.infrastructure.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.tech.imagecorebackendmodel.user.entity.UserAIChatHis;
 import com.tech.imagecorebackendmodel.user.entity.UserAiChat;
 
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -13,7 +15,9 @@ import java.util.List;
 * @Entity com.tech.imagocorebackend.domain.user.entity.UserAiChat
 */
 public interface UserAiChatMapper extends BaseMapper<UserAiChat> {
+    List<UserAIChatHis> queryALLChatHistoryByUser(Long userId);
 
+    List<UserAIChatHis> queryChatHistoryByUserAndTime(Long userId, String chatId, Timestamp lastTimestamp);
 }
 
 

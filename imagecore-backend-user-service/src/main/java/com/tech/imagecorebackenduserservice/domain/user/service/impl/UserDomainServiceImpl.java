@@ -19,6 +19,7 @@ import com.tech.imagecorebackendmodel.user.constant.UserConstant;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.user.valueobject.UserRedisLuaScriptConstant;
 import com.tech.imagecorebackendmodel.user.valueobject.UserRoleEnum;
+import com.tech.imagecorebackendmodel.user.valueobject.UserVipEnum;
 import com.tech.imagecorebackendmodel.vo.user.LoginUserVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
 import com.tech.imagecorebackenduserservice.domain.user.repository.UserRepository;
@@ -322,6 +323,27 @@ public class UserDomainServiceImpl implements UserDomainService {
     @Override
     public void batchUpdateScore(Map<Long, Long> scoreMap) {
         userMapper.batchUpdateScore(scoreMap);
+    }
+
+    @Override
+    public void userSubscribesVip(User user) {
+        ThrowUtils.throwIf(user == null, ErrorCode.PARAMS_ERROR, "用户为空");
+        UserVipEnum.assertEnumValue(user.getVipType());
+        String vipDateStr = UserVipEnum.getEnumByText(user.getVipType()).getValue();
+        // 将字符串转换为整数
+        int days = Integer.parseInt(vipDateStr);
+        // 获取当前日期
+        Calendar calendar = Calendar.getInstance();
+        // 添加指定天数
+        calendar.add(Calendar.DAY_OF_YEAR, days);
+        // 返回新的Date对象
+        Date vipDate = calendar.getTime();
+        // 更新会员
+        User newUser = new User();
+        newUser.setId(user.getId());
+        newUser.setVipType(user.getVipType());
+        newUser.setVipExpiry(vipDate);
+        userRepository.updateById(newUser);
     }
 }
 

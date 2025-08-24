@@ -19,4 +19,34 @@
         editTime,updateTime,isDelete
     </sql>
 
+    <select id="queryALLChatHistoryByUser" resultType="com.tech.imagecorebackendmodel.user.entity.UserAIChatHis">
+        SELECT chatType, chatId, chatContent, timestamp
+        FROM (
+            SELECT
+            a.type as chatType,
+            a.conversation_id as chatId
+            a.content as chatContent,
+            timestamp,
+            @row_num := IF(@current_chat = a.conversation_id, @row_num + 1, 1) AS rn,  -- 行号逻辑
+            @current_chat := a.conversation_id  -- 更新当前 chatId
+            FROM ai_chat_memory a, user_ai_chat b
+            CROSS JOIN (SELECT @current_chat := NULL, @row_num := 0) AS vars  -- 初始化变量
+            WHERE a.conversation_id = b.conversationId COLLATE utf8mb4_unicode_ci = a.conversation_id and b.userId =  #{userId}  -- 替换 'a' 为实际用户 ID
+            ORDER BY a.conversation_id, timestamp DESC  -- 必须先按 chatId 和时间戳排序！
+            ) AS ranked
+        WHERE rn &lt;= 10  -- 只取每个 chatId 的前 10 条
+    </select>
+
+    <select id="queryChatHistoryByUserAndTime" resultType="com.tech.imagecorebackendmodel.user.entity.UserAIChatHis">
+        SELECT a.conversation_id, a.content, a.type, a.timestamp FROM ai_chat_memory a, user_ai_chat b
+        <where>
+            a.conversation_id = b.conversationId COLLATE utf8mb4_unicode_ci = a.conversation_id
+            <if test="userId != null">AND b.user_id = #{userId}</if>
+            <if test="chatId != null">AND b.conversationId = #{chatId}</if>
+            <if test="lastTimestamp != null">AND a.timestamp &lt;= #{lastTimestamp}</if>
+        </where>
+        ORDER BY a.timestamp DESC
+        LIMIT 10
+    </select>
+
 </mapper>
