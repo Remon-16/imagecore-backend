@@ -115,6 +115,21 @@ public class UserController {
     }
 
     /**
+     * 给用户用的更新用户信息
+     * @return
+     */
+    @PostMapping("/update_user_info")
+    public BaseResponse<Boolean> updateUserInfo(@RequestBody UserUpdateInfoRequest userUpdateInfoRequest){
+        if (userUpdateInfoRequest == null || userUpdateInfoRequest.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 对象转换
+        User userEntity = UserAssembler.toUserEntity(userUpdateInfoRequest);
+        userApplicationService.updateUser(userEntity);
+        return ResultUtils.success(true);
+    }
+
+    /**
      * 更新用户
      */
     @PostMapping("/update")
@@ -145,10 +160,10 @@ public class UserController {
             value = -30L,
             maxCount = -1L)
     @PostMapping("/userSubscribesVip")
-    public BaseResponse<Boolean> userSubscribesVip(@RequestBody UserUpdateRequest userUpdateRequest){
+    public BaseResponse<Boolean> userSubscribesVip(@RequestBody UserUpdateInfoRequest userUpdateInfoRequest){
         User user = new User();
-        user.setId(userUpdateRequest.getId());
-        user.setVipType(userUpdateRequest.getVipType());
+        user.setId(userUpdateInfoRequest.getId());
+        user.setVipType(userUpdateInfoRequest.getVipType());
         userApplicationService.updateUser(user);
         return ResultUtils.success(true);
     }
