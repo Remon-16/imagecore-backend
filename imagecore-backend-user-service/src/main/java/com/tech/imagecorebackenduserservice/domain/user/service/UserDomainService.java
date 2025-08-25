@@ -3,11 +3,14 @@ package com.tech.imagecorebackenduserservice.domain.user.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tech.imagecorebackendmodel.dto.user.UserQueryRequest;
+import com.tech.imagecorebackendmodel.dto.user.UserUpdateInfoRequest;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.user.LoginUserVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -121,4 +124,12 @@ public interface UserDomainService {
      * @param user
      */
     void userSubscribesVip(User user);
+    /**
+     * 用户更新头像
+     * @param avatar
+     * @param userUpdateInfoRequest
+     * @param loginUser
+     * @return
+     */
+    boolean updateUserAvatar(MultipartFile avatar, UserUpdateInfoRequest userUpdateInfoRequest, User loginUser);
 }

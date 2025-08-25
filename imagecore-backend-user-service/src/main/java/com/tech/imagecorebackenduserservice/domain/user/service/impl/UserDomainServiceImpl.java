@@ -15,6 +15,7 @@ import com.tech.imagecorebackendcommon.exception.ThrowUtils;
 import com.tech.imagecorebackendcommon.utils.CacheUtils;
 import com.tech.imagecorebackendcommon.utils.JwtUtils;
 import com.tech.imagecorebackendmodel.dto.user.UserQueryRequest;
+import com.tech.imagecorebackendmodel.dto.user.UserUpdateInfoRequest;
 import com.tech.imagecorebackendmodel.user.constant.UserConstant;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.user.valueobject.UserRedisLuaScriptConstant;
@@ -22,6 +23,7 @@ import com.tech.imagecorebackendmodel.user.valueobject.UserRoleEnum;
 import com.tech.imagecorebackendmodel.user.valueobject.UserVipEnum;
 import com.tech.imagecorebackendmodel.vo.user.LoginUserVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
+import com.tech.imagecorebackendserviceclient.application.service.PictureFeignClient;
 import com.tech.imagecorebackenduserservice.domain.user.repository.UserRepository;
 import com.tech.imagecorebackenduserservice.domain.user.service.UserDomainService;
 import com.tech.imagecorebackenduserservice.infrastructure.dco.UserCacheHandler;
@@ -34,6 +36,8 @@ import org.springframework.util.DigestUtils;
 import jakarta.annotation.Resource;
 import javax.crypto.SecretKey;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,6 +61,9 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private PictureFeignClient pictureFeignClient;
 
     private String getTimeSlice() {
         DateTime nowDate = DateUtil.date();
@@ -344,6 +351,17 @@ public class UserDomainServiceImpl implements UserDomainService {
         newUser.setVipType(user.getVipType());
         newUser.setVipExpiry(vipDate);
         userRepository.updateById(newUser);
+    }
+
+    @Override
+    public boolean updateUserAvatar(MultipartFile avatar, UserUpdateInfoRequest userUpdateInfoRequest, User loginUser) {
+        String uploadPathPrefix = String.format("public/%s", loginUser.getId());
+        String url = pictureFeignClient.uploadUserAvatar(avatar, uploadPathPrefix);
+        User user = new User();
+        user.setId(loginUser.getId());
+        user.setUserAvatar(url);
+        userRepository.updateById(user);
+        return true;
     }
 }
 

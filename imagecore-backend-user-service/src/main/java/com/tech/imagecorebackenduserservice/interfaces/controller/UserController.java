@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/")
@@ -112,6 +113,20 @@ public class UserController {
         }
         boolean b = userApplicationService.deleteUser(deleteRequest);
         return ResultUtils.success(b);
+    }
+
+    /**
+     * 用户上传头像
+     * @return
+     */
+    @PostMapping("/update_user_avatar")
+    public BaseResponse<Boolean> updateUserAvatar(
+            @RequestPart("file") MultipartFile multipartFile,
+            UserUpdateInfoRequest userUpdateInfoRequest,
+            HttpServletRequest request){
+        User loginUser = userApplicationService.getLoginUser(request);
+        boolean res = userApplicationService.updateUserAvatar(multipartFile, userUpdateInfoRequest, loginUser);
+        return ResultUtils.success(res);
     }
 
     /**

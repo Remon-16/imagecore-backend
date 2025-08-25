@@ -41,6 +41,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import jakarta.annotation.Resource;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.awt.*;
 import java.io.IOException;
 import java.util.*;
@@ -584,6 +586,12 @@ public class PictureDomainServiceImpl
     @Override
     public Text2ImageTaskResponse createText2ImageTask(Text2ImageTaskRequest text2ImageTaskRequest) {
         return text2ImageApi.createText2ImageTask(text2ImageTaskRequest);
+    }
+
+    @Override
+    public String uploadUserAvatar(MultipartFile multipartFile, String uploadPathPrefix) {
+        UploadPictureResult uploadPictureResult = filePictureUpload.uploadPicture(multipartFile, uploadPathPrefix);
+        return uploadPictureResult.getUrl();
     }
 }
 

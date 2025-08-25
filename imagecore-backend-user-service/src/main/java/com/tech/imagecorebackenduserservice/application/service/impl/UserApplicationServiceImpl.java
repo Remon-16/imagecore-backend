@@ -10,6 +10,7 @@ import com.tech.imagecorebackendcommon.exception.ThrowUtils;
 import com.tech.imagecorebackendmodel.dto.user.UserLoginRequest;
 import com.tech.imagecorebackendmodel.dto.user.UserQueryRequest;
 import com.tech.imagecorebackendmodel.dto.user.UserRegisterRequest;
+import com.tech.imagecorebackendmodel.dto.user.UserUpdateInfoRequest;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.user.LoginUserVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -208,6 +211,11 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     @Override
     public void userSubscribesVip(User user) {
         userDomainService.userSubscribesVip(user);
+    }
+
+    @Override
+    public boolean updateUserAvatar(MultipartFile avatar, UserUpdateInfoRequest userUpdateInfoRequest, User loginUser) {
+        return userDomainService.updateUserAvatar(avatar, userUpdateInfoRequest, loginUser);
     }
 }
 

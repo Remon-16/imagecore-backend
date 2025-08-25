@@ -6,11 +6,14 @@ import com.tech.imagecorebackendcommon.common.DeleteRequest;
 import com.tech.imagecorebackendmodel.dto.user.UserLoginRequest;
 import com.tech.imagecorebackendmodel.dto.user.UserQueryRequest;
 import com.tech.imagecorebackendmodel.dto.user.UserRegisterRequest;
+import com.tech.imagecorebackendmodel.dto.user.UserUpdateInfoRequest;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.user.LoginUserVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -124,4 +127,13 @@ public interface UserApplicationService {
      * @param user
      */
     void userSubscribesVip(User user);
+
+    /**
+     * 用户更新头像
+     * @param avatar
+     * @param userUpdateInfoRequest
+     * @param loginUser
+     * @return
+     */
+    boolean updateUserAvatar(MultipartFile avatar, UserUpdateInfoRequest userUpdateInfoRequest, User loginUser);
 }

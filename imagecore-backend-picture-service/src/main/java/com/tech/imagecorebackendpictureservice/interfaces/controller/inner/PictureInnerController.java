@@ -1,16 +1,16 @@
 package com.tech.imagecorebackendpictureservice.interfaces.controller.inner;
 
 import com.tech.imagecorebackendmodel.dto.space.analyze.*;
+import com.tech.imagecorebackendmodel.dto.user.UserUpdateInfoRequest;
 import com.tech.imagecorebackendmodel.picture.entity.Picture;
 import com.tech.imagecorebackendmodel.vo.space.analyze.SpaceCategoryAnalyzeResponse;
 import com.tech.imagecorebackendpictureservice.application.service.PictureApplicationService;
 import com.tech.imagecorebackendserviceclient.application.service.PictureFeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +51,18 @@ public class PictureInnerController implements PictureFeignClient {
     }
 
     @Override
+    @GetMapping("/get/id")
     public Picture getById(Long pictureId) {
         return pictureApplicationService.getById(pictureId);
+    }
+
+    @Override
+    /**
+     * 用户上传头像
+     * @return
+     */
+    @PostMapping("/upload_user_avatar")
+    public String uploadUserAvatar(MultipartFile multipartFile, String uploadPathPrefix) {
+        return pictureApplicationService.uploadUserAvatar(multipartFile, uploadPathPrefix);
     }
 }

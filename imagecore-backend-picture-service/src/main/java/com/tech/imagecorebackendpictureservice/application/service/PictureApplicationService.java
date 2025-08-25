@@ -15,6 +15,8 @@ import com.tech.imagecorebackendpictureservice.api.aliyunai.model.CreatePictureO
 import com.tech.imagecorebackendpictureservice.api.aliyunai.model.Text2ImageTaskRequest;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.model.Text2ImageTaskResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Map;
 
@@ -183,4 +185,6 @@ public interface PictureApplicationService extends IService<Picture> {
      * @return
      */
     Text2ImageTaskResponse createText2ImageTask(Text2ImageTaskRequest text2ImageTaskRequest);
+
+    String uploadUserAvatar(MultipartFile multipartFile, String uploadPathPrefix);
 }

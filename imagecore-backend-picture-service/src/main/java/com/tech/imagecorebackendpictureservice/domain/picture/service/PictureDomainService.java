@@ -9,6 +9,7 @@ import com.tech.imagecorebackendmodel.vo.picture.PictureVO;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.model.CreatePictureOutPaintingTaskRequest;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.model.Text2ImageTaskRequest;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.model.Text2ImageTaskResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -129,4 +130,6 @@ public interface PictureDomainService {
      * @return
      */
     Text2ImageTaskResponse createText2ImageTask(Text2ImageTaskRequest text2ImageTaskRequest);
+
+    String uploadUserAvatar(MultipartFile multipartFile, String uploadPathPrefix);
 }

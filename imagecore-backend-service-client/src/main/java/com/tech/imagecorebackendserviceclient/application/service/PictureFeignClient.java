@@ -2,13 +2,13 @@ package com.tech.imagecorebackendserviceclient.application.service;
 
 
 import com.tech.imagecorebackendmodel.dto.space.analyze.*;
+import com.tech.imagecorebackendmodel.dto.user.UserUpdateInfoRequest;
 import com.tech.imagecorebackendmodel.picture.entity.Picture;
 import com.tech.imagecorebackendmodel.vo.space.analyze.SpaceCategoryAnalyzeResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Map;
 
@@ -35,4 +35,11 @@ public interface PictureFeignClient {
 
     @GetMapping("/get/id")
     Picture getById(@RequestParam("pictureId") Long pictureId);
+
+    /**
+     * 用户上传头像
+     * @return
+     */
+    @PostMapping("/upload_user_avatar")
+    String uploadUserAvatar(@RequestPart("file") MultipartFile multipartFile, String uploadPathPrefix);
 }

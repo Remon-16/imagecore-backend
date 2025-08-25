@@ -41,6 +41,8 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -451,5 +453,10 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
     @Override
     public Text2ImageTaskResponse createText2ImageTask(Text2ImageTaskRequest text2ImageTaskRequest) {
         return pictureDomainService.createText2ImageTask(text2ImageTaskRequest);
+    }
+
+    @Override
+    public String uploadUserAvatar(MultipartFile multipartFile, String uploadPathPrefix) {
+        return pictureDomainService.uploadUserAvatar(multipartFile, uploadPathPrefix);
     }
 }
