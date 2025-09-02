@@ -1,6 +1,7 @@
 package com.tech.imagecorebackendmodel.vo.picture;
 
 import com.tech.imagecorebackendmodel.picture.entity.PictureComment;
+import com.tech.imagecorebackendmodel.vo.user.UserVO;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
@@ -26,9 +27,29 @@ public class PictureCommentVo {
     private Long targetId;
 
     /**
+     * 二级目标 id 为空代表是二级评论，不为空说明是三级评论
+     */
+    private Long secondTargetId;
+
+    /**
+     * 目标用户的Id
+     */
+    private Long targetUserId;
+
+    /**
+     * 目标用户的昵称
+     */
+    private String targetUserName;
+
+    /**
      * 评论内容
      */
     private String content;
+
+    /**
+     * 用户信息
+     */
+    private UserVO user;
 
     /**
      * 创建时间

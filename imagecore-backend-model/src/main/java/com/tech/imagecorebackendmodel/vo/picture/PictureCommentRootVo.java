@@ -1,5 +1,6 @@
 package com.tech.imagecorebackendmodel.vo.picture;
 
+import com.tech.imagecorebackendmodel.vo.user.UserVO;
 import lombok.Data;
 
 import java.util.Date;
@@ -31,6 +32,12 @@ public class PictureCommentRootVo {
      * 创建时间
      */
     private Date createTime;
+
+    /**
+     * 用户信息
+     */
+    private UserVO user;
+
     /**
      * 子评论
      */

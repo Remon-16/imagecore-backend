@@ -35,6 +35,11 @@ public class PictureComment implements Serializable {
     private Long targetId;
 
     /**
+     * 二级目标 id 为空代表是二级评论，不为空说明是三级评论
+     */
+    private Long secondTargetId;
+
+    /**
      * 评论内容
      */
     private String content;

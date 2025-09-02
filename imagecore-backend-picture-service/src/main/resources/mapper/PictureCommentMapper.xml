@@ -9,6 +9,7 @@
             <result property="userId" column="userId" />
             <result property="pictureId" column="pictureId" />
             <result property="targetId" column="targetId" />
+            <result property="secondTargetId" column="secondTargetId" />
             <result property="content" column="content" />
             <result property="createTime" column="createTime" />
             <result property="editTime" column="editTime" />
@@ -18,6 +19,6 @@
 
     <sql id="Base_Column_List">
         id,userId,pictureId,targetId,content,createTime,
-        editTime,updateTime,isDelete
+        editTime,updateTime,secondTargetId,isDelete
     </sql>
 </mapper>

@@ -206,3 +206,12 @@ create table if not exists picture_comment(
     INDEX idx_pictureId (pictureId)       -- 提升基于用户的查询效率
 )comment '评论表' collate = utf8mb4_unicode_ci;
 
+-- 优化直接评论查询
+ALTER TABLE picture_comment ADD INDEX idx_picture_target (pictureId, targetId);
+
+-- 优化子评论查询
+ALTER TABLE picture_comment ADD INDEX idx_target_time (targetId, createTime);
+
+-- 添加新列
+ALTER TABLE picture_comment
+    ADD COLUMN secondTargetId  bigint  null  comment '二级目标评论Id';
