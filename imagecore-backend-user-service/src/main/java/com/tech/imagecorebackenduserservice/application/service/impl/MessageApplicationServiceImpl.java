@@ -26,12 +26,16 @@ public class MessageApplicationServiceImpl implements MessageApplicationService 
     }
 
     @Override
-    public void allMessageREAD(Long userId) {
-        messageDomainService.allMessageREAD(userId);
+    public void allMessageREAD(Long userId, String messageType) {
+        messageDomainService.allMessageREAD(userId, messageType);
     }
-
     @Override
     public Page<MessageVo> listMessageVoByPage(UserMessageRequest userMessageRequest, HttpServletRequest request) {
         return messageDomainService.listMessageVoByPage(userMessageRequest, request);
+    }
+
+    @Override
+    public Boolean getExistUnReadMessage(UserMessageRequest userMessageRequest) {
+        return messageDomainService.getExistUnReadMessage(userMessageRequest);
     }
 }

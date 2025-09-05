@@ -30,6 +30,11 @@ public class UserAiChat implements Serializable {
     private String conversationId;
 
     /**
+     * 聊天类型
+     */
+    private String chatType;
+
+    /**
      * 创建时间
      */
     private Date createTime;

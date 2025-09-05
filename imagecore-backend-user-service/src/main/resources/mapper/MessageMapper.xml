@@ -11,6 +11,8 @@
             <result property="messageType" column="messageType" />
             <result property="messageState" column="messageState" />
             <result property="senderId" column="senderId" />
+            <result property="pictureId" column="pictureId" />
+            <result property="commentId" column="commentId" />
             <result property="createTime" column="createTime" />
             <result property="editTime" column="editTime" />
             <result property="updateTime" column="updateTime" />
@@ -19,12 +21,13 @@
 
     <sql id="Base_Column_List">
         id,userId,content,messageType,messageState,senderId,
+        pictureId,commentId,
         createTime,editTime,updateTime,isDelete
     </sql>
 
     <update id="updateReadByUser">
         UPDATE message
         SET messageState = #{messageStatus}
-        WHERE userId = #{userId}
+        WHERE userId = #{userId} and messageType = #{messageType}
     </update>
 </mapper>

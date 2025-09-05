@@ -45,6 +45,17 @@ public class Message implements Serializable {
     private Long senderId;
 
     /**
+     * 图片 id
+     */
+    private Long pictureId;
+
+    /**
+     * 评论 id
+     */
+    private Long commentId;
+
+
+    /**
      * 创建时间
      */
     private Date createTime;

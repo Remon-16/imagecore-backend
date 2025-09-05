@@ -8,6 +8,7 @@
             <id property="id" column="id" />
             <result property="userId" column="userId" />
             <result property="conversationId" column="conversationId" />
+            <result property="chatType" column="chatType" />
             <result property="createTime" column="createTime" />
             <result property="editTime" column="editTime" />
             <result property="updateTime" column="updateTime" />
@@ -15,7 +16,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,userId,conversationId,createTime,
+        id,userId,conversationId,createTime,chatType,
         editTime,updateTime,isDelete
     </sql>
 
@@ -31,7 +32,7 @@
             @current_chat := a.conversation_id  -- 更新当前 chatId
             FROM ai_chat_memory a, user_ai_chat b
             CROSS JOIN (SELECT @current_chat := NULL, @row_num := 0) AS vars  -- 初始化变量
-            WHERE a.conversation_id = b.conversationId COLLATE utf8mb4_unicode_ci = a.conversation_id and b.userId =  #{userId}  -- 替换 'a' 为实际用户 ID
+            WHERE a.conversation_id = b.conversationId COLLATE utf8mb4_unicode_ci = a.conversation_id and b.userId =  #{userId} and b.chatType = #{chatType}
             ORDER BY a.conversation_id, timestamp DESC  -- 必须先按 chatId 和时间戳排序！
             ) AS ranked
         WHERE rn &lt;= 10  -- 只取每个 chatId 的前 10 条

@@ -174,6 +174,13 @@ create table if not exists user_ai_chat(
     INDEX idx_userId (userId)       -- 提升基于用户的查询效率
 )comment '用户和AI聊天的关联表' collate = utf8mb4_unicode_ci;
 
+-- 添加新列
+ALTER TABLE user_ai_chat
+    ADD COLUMN chatType  varchar(256)  null  comment '聊天类型';
+
+-- 优化子评论查询
+ALTER TABLE user_ai_chat ADD INDEX idx_chatType (chatType);
+
 -- 消息表
 create table if not exists message(
     id         bigint auto_increment primary key,
@@ -189,6 +196,14 @@ create table if not exists message(
 
     INDEX idx_userId (userId)       -- 提升基于用户的查询效率
 )comment '消息表' collate = utf8mb4_unicode_ci;
+
+-- 添加新列
+ALTER TABLE message
+    ADD COLUMN pictureId  bigint  null  comment '图片 id';
+
+-- 添加新列
+ALTER TABLE message
+    ADD COLUMN commentId  bigint  null  comment '评论 id';
 
 -- 图片评论表
 create table if not exists picture_comment(

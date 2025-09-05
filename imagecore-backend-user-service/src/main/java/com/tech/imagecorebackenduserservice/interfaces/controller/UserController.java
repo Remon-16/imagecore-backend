@@ -23,6 +23,12 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.Date;
+
 @RestController
 @RequestMapping("/")
 public class UserController {
@@ -179,6 +185,13 @@ public class UserController {
         User user = new User();
         user.setId(userUpdateInfoRequest.getId());
         user.setVipType(userUpdateInfoRequest.getVipType());
+        // 获取当前日期
+        LocalDate today = LocalDate.now();
+        // 获取当前日期后一个月的日期
+        LocalDate nextMonth = today.plusMonths(1);
+        Instant instant = nextMonth.atTime(LocalTime.MIDNIGHT).atZone(ZoneId.systemDefault()).toInstant();
+        Date date = Date.from(instant);
+        user.setVipExpiry(date);
         userApplicationService.updateUser(user);
         return ResultUtils.success(true);
     }

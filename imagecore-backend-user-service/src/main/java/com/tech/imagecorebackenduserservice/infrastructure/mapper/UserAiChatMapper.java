@@ -15,7 +15,7 @@ import java.util.List;
 * @Entity com.tech.imagocorebackend.domain.user.entity.UserAiChat
 */
 public interface UserAiChatMapper extends BaseMapper<UserAiChat> {
-    List<UserAIChatHis> queryALLChatHistoryByUser(Long userId);
+    List<UserAIChatHis> queryALLChatHistoryByUser(Long userId, String chatType);
 
     List<UserAIChatHis> queryChatHistoryByUserAndTime(Long userId, String chatId, Timestamp lastTimestamp);
 }

@@ -12,7 +12,7 @@ import org.apache.ibatis.annotations.Param;
 * @Entity com.tech.imagocorebackend.domain.user.entity.Message
 */
 public interface MessageMapper extends BaseMapper<Message> {
-    void updateReadByUser(@Param("userId") Long userId, @Param("messageStatus") String messageStatus);
+    void updateReadByUser(@Param("userId") Long userId, @Param("messageStatus") String messageStatus, @Param("messageType") String messageType);
 }
 
 

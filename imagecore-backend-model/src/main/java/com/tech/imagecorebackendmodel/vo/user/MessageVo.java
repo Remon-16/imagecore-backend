@@ -1,6 +1,7 @@
 package com.tech.imagecorebackendmodel.vo.user;
 
 import com.tech.imagecorebackendmodel.user.entity.Message;
+import com.tech.imagecorebackendmodel.vo.picture.PictureCommentVo;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
@@ -38,6 +39,22 @@ public class MessageVo implements Serializable {
      * 发送者 id
      */
     private Long senderId;
+
+    /**
+     * 图片 id
+     */
+    private Long pictureId;
+
+    /**
+     * 评论 id
+     */
+    private Long commentId;
+
+    /**
+     * 评论
+     */
+    private PictureCommentVo pictureCommentVo;
+
 
     /**
      * 创建时间

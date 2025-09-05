@@ -16,7 +16,9 @@ public interface MessageDomainService {
 
     void messageSend(Message message);
 
-    void allMessageREAD(Long userId);
+    void allMessageREAD(Long userId, String messageType);
 
     Page<MessageVo> listMessageVoByPage(UserMessageRequest userMessageRequest, HttpServletRequest request);
+
+    Boolean getExistUnReadMessage(UserMessageRequest userMessageRequest);
 }

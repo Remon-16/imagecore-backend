@@ -43,7 +43,7 @@ public class CSChatApp {
                 .build();
     }
 
-    public String getChat(String userMessage, String chatId){
+    public String getChat(String chatId, String userMessage){
         ChatResponse chatResponse = csChatClient
                 .prompt()
                 .user(userMessage)

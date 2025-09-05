@@ -1,6 +1,8 @@
 package com.tech.imagecorebackenduserservice.interfaces.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tech.imagecorebackendcommon.common.BaseResponse;
+import com.tech.imagecorebackendcommon.common.ResultUtils;
 import com.tech.imagecorebackendmodel.dto.user.UserMessageRequest;
 import com.tech.imagecorebackendmodel.vo.user.MessageVo;
 import com.tech.imagecorebackenduserservice.application.service.MessageApplicationService;
@@ -20,16 +22,20 @@ public class MessageController {
 
     @PostMapping("/allMessageREAD")
     public void allMessageREAD(@RequestBody UserMessageRequest userMessageRequest){
-        messageApplicationService.allMessageREAD(userMessageRequest.getUserId());
+        messageApplicationService.allMessageREAD(userMessageRequest.getUserId(), userMessageRequest.getMessageType());
     }
 
     @PostMapping("/listMessageVoByPage")
-    public Page<MessageVo> listMessageVoByPage(@RequestBody UserMessageRequest userMessageRequest, HttpServletRequest request){
-        return messageApplicationService.listMessageVoByPage(userMessageRequest, request);
+    public BaseResponse<Page<MessageVo>> listMessageVoByPage(@RequestBody UserMessageRequest userMessageRequest, HttpServletRequest request){
+        return ResultUtils.success(messageApplicationService.listMessageVoByPage(userMessageRequest, request));
     }
 
     @PostMapping("/changeMessageStatus")
     public void changeMessageStatus(@RequestBody UserMessageRequest userMessageRequest){
         messageApplicationService.changeMessageStatus(userMessageRequest.getMessageId(), userMessageRequest.getMessageStatus());
+    }
+    @PostMapping("/getExistUnReadMessage")
+    public BaseResponse<Boolean> getExistUnReadMessage(@RequestBody UserMessageRequest userMessageRequest){
+        return ResultUtils.success(messageApplicationService.getExistUnReadMessage(userMessageRequest));
     }
 }

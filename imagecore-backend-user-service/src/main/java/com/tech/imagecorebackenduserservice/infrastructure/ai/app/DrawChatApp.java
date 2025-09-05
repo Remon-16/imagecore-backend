@@ -37,7 +37,7 @@ public class DrawChatApp {
                 .build();
     }
 
-    public String getDrawChat(String userMessage, String chatId){
+    public String getDrawChat(String chatId, String userMessage){
         ChatResponse chatResponse = drawChatClient
                 .prompt()
                 .user(userMessage)

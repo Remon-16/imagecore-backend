@@ -84,7 +84,21 @@ public class MessageDomainServiceImpl extends ServiceImpl<MessageMapper, Message
     }
 
     @Override
-    public void allMessageREAD(Long userId) {
-        messageMapper.updateReadByUser(userId, MessageConstant.MESSAGE_READ);
+    public void allMessageREAD(Long userId, String messageType) {
+        messageMapper.updateReadByUser(userId, MessageConstant.MESSAGE_READ, messageType);
+    }
+
+    @Override
+    public Boolean getExistUnReadMessage(UserMessageRequest userMessageRequest) {
+        QueryWrapper<Message> queryWrapper = new QueryWrapper<>();
+        if (userMessageRequest == null) {
+            return false;
+        }
+        Long userId = userMessageRequest.getUserId();
+        queryWrapper.eq(ObjUtil.isNotEmpty(userId), "userId", userId);
+        queryWrapper.exists("messageStatus", 0);
+        Page<Message> messagePage = page(new Page<>(1, 10),
+                getQueryWrapper(userMessageRequest));
+        return !messagePage.getRecords().isEmpty();
     }
 }
