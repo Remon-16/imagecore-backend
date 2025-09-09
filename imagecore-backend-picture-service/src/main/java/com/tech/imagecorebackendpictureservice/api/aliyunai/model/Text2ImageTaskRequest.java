@@ -74,7 +74,7 @@ public class Text2ImageTaskRequest {
         /**
          * 生成图片的数量。取值范围为1~4张，默认为4。
          */
-        private Integer n;
+        private Integer n = 1;
 
         /**
          * 控制输出图像与垫图（参考图）的相似度。

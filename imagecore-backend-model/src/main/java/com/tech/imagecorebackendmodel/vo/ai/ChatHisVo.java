@@ -8,7 +8,7 @@ import java.util.Date;
 @Data
 public class ChatHisVo {
 
-    private Integer messageId;
+    private Long messageId;
 
     private String chatId;
 

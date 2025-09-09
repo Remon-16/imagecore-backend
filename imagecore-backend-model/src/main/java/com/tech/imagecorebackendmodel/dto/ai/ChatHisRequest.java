@@ -14,6 +14,10 @@ public class ChatHisRequest  extends PageRequest implements Serializable {
      */
     private Long userId;
     /**
+     * 对话 id
+     */
+    private String chatId;
+    /**
      * 聊天类型
      */
     private String chatType;

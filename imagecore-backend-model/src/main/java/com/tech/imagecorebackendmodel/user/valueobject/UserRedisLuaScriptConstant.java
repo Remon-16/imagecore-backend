@@ -25,14 +25,13 @@ public class UserRedisLuaScriptConstant {
             local newTempScore = tonumber(score) + oldTempScore
             
             redis.call('HSET', tempScoreKey, hashKey, newTempScore)
-            redis.call('SET', userScoreKey, timeSlice)
+            redis.call('SET', userScoreKey, newScore)
             
-            -- 4. 如果是增加积分，需要更新限制次数
-            if score > 0 then
-                local oldCount = tonumber(redis.call('get', userScoreCountKey) or 0)
-                local newCount = oldCount + 1
-                redis.call('SET', userScoreCountKey, newCount)
-            end
+            -- 4. 更新使用记录
+            local oldCount = tonumber(redis.call('get', userScoreCountKey) or 0)
+            local newCount = oldCount + 1
+            redis.call('SET', userScoreCountKey, newCount)
+
             
             return 1  -- 返回 1 表示成功
             """;

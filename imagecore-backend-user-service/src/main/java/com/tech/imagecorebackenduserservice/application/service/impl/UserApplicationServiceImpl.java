@@ -7,10 +7,7 @@ import com.tech.imagecorebackendcommon.common.DeleteRequest;
 import com.tech.imagecorebackendcommon.exception.BusinessException;
 import com.tech.imagecorebackendcommon.exception.ErrorCode;
 import com.tech.imagecorebackendcommon.exception.ThrowUtils;
-import com.tech.imagecorebackendmodel.dto.user.UserLoginRequest;
-import com.tech.imagecorebackendmodel.dto.user.UserQueryRequest;
-import com.tech.imagecorebackendmodel.dto.user.UserRegisterRequest;
-import com.tech.imagecorebackendmodel.dto.user.UserUpdateInfoRequest;
+import com.tech.imagecorebackendmodel.dto.user.*;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.user.LoginUserVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
@@ -216,6 +213,11 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     @Override
     public boolean updateUserAvatar(MultipartFile avatar, UserUpdateInfoRequest userUpdateInfoRequest, User loginUser) {
         return userDomainService.updateUserAvatar(avatar, userUpdateInfoRequest, loginUser);
+    }
+
+    @Override
+    public void userAddScore(UserChangeScoreRequest userChangeScoreRequest) {
+        userDomainService.userAddScore(userChangeScoreRequest);
     }
 }
 

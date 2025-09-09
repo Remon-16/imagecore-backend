@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Text2ImageTaskResponse {
 
-    private CreateOutPaintingTaskResponse.Output output;
+    private Output output;
 
     /**
      * 表示任务的输出信息

@@ -9,7 +9,9 @@ import com.tech.imagecorebackendcommon.exception.ErrorCode;
 import com.tech.imagecorebackendcommon.exception.ThrowUtils;
 import com.tech.imagecorebackendmodel.dto.picture.PictureCommentQueryRequest;
 import com.tech.imagecorebackendmodel.dto.picture.PictureCommentRequest;
+import com.tech.imagecorebackendmodel.dto.user.UserChangeScoreRequest;
 import com.tech.imagecorebackendmodel.picture.entity.PictureComment;
+import com.tech.imagecorebackendmodel.user.constant.UserScoreConstant;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.picture.PictureCommentRootVo;
 import com.tech.imagecorebackendmodel.vo.picture.PictureCommentVo;
@@ -38,11 +40,20 @@ public class PictureCommentDomainServiceImpl extends ServiceImpl<PictureCommentM
         PictureComment pictureComment = new PictureComment();
         BeanUtils.copyProperties(pictureCommentRequest, pictureComment);
         if (pictureComment.getId() == null) {
+            UserChangeScoreRequest userChangeScoreRequest = new UserChangeScoreRequest();
+            userChangeScoreRequest.setUserId(pictureComment.getUserId());
+            userChangeScoreRequest.setScoreType(UserScoreConstant.PICTURE_COMMENT);
+            userFeignClient.userAddScore(userChangeScoreRequest);
             this.save(pictureComment);
         }else {
             this.updateById(pictureComment);
         }
         return pictureComment;
+    }
+
+    @Override
+    public Boolean deletePictureComment(PictureCommentRequest pictureCommentRequest) {
+        return this.removeById(pictureCommentRequest.getId());
     }
 
     @Override

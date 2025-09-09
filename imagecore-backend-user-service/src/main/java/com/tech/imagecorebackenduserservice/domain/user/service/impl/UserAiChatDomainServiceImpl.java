@@ -9,12 +9,14 @@ import com.tech.imagecorebackendcommon.exception.ErrorCode;
 import com.tech.imagecorebackendcommon.exception.ThrowUtils;
 import com.tech.imagecorebackendmodel.dto.ai.ChatHisRequest;
 import com.tech.imagecorebackendmodel.dto.ai.ChatRequest;
+import com.tech.imagecorebackendmodel.user.entity.AiChatMemory;
 import com.tech.imagecorebackendmodel.user.entity.UserAIChatHis;
 import com.tech.imagecorebackendmodel.user.entity.UserAiChat;
 import com.tech.imagecorebackendmodel.vo.ai.ChatAllHisResponse;
 import com.tech.imagecorebackendmodel.vo.ai.ChatHisListVo;
 import com.tech.imagecorebackendmodel.vo.ai.ChatHisResponse;
 import com.tech.imagecorebackendmodel.vo.ai.ChatHisVo;
+import com.tech.imagecorebackenduserservice.domain.user.repository.AiChatMemoryRepository;
 import com.tech.imagecorebackenduserservice.domain.user.service.UserAiChatDomainService;
 import com.tech.imagecorebackenduserservice.domain.user.service.UserDomainService;
 import com.tech.imagecorebackenduserservice.infrastructure.ai.service.ChatDomainService;
@@ -108,8 +110,12 @@ public class UserAiChatDomainServiceImpl implements UserAiChatDomainService {
     public Page<ChatHisVo> getChatHisVo(ChatHisRequest chatHisRequest){
         ThrowUtils.throwIf(chatHisRequest == null, ErrorCode.PARAMS_ERROR);
         ThrowUtils.throwIf(chatHisRequest.getPageSize() > 50, ErrorCode.PARAMS_ERROR);
-        Page<AiChatMemory> aiChatMemoryPage = aiChatMemoryRepository.page(new Page<>(chatHisRequest.getCurrent(), chatHisRequest.getPageSize()),
-                getAiChatMemoryQueryWrapper(chatHisRequest.getChatId(), chatHisRequest.getLastChatTime(), chatHisRequest.getSortField(), chatHisRequest.getSortOrder()));
+        List<AiChatMemory> aiChatMemoryList = aiChatMemoryRepository.list(getAiChatMemoryQueryWrapper(chatHisRequest.getChatId(),
+                chatHisRequest.getLastChatTime(), chatHisRequest.getSortField(), chatHisRequest.getSortOrder()));
+        Page<AiChatMemory> aiChatMemoryPage = new Page<>();
+        aiChatMemoryPage.setRecords(aiChatMemoryList);
+        aiChatMemoryPage.setTotal(aiChatMemoryList.size());
+        aiChatMemoryPage.setCurrent(1);
         return this.getChatHisVoPage(aiChatMemoryPage);
     }
 
@@ -120,14 +126,17 @@ public class UserAiChatDomainServiceImpl implements UserAiChatDomainService {
         QueryWrapper<UserAiChat> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userId", chatHisRequest.getUserId());
         queryWrapper.eq("chatType", chatHisRequest.getChatType());
+        queryWrapper.orderBy(StrUtil.isNotEmpty(chatHisRequest.getSortField()),
+                chatHisRequest.getSortOrder().equals("ascend"), chatHisRequest.getSortField());
         List<UserAiChat> userAiChatList = userAiChatMapper.selectList(queryWrapper);
         List<ChatHisListVo> chatHisListVos = new ArrayList<>();
         ChatHisRequest chatHisRequest1 = new ChatHisRequest();
         chatHisRequest1.setUserId(chatHisRequest.getUserId());
         chatHisRequest1.setChatType(chatHisRequest.getChatType());
         chatHisRequest1.setLastChatTime(chatHisRequest.getLastChatTime());
-        chatHisRequest1.setSortField(chatHisRequest.getSortField());
-        chatHisRequest1.setSortOrder(chatHisRequest.getSortOrder());
+        chatHisRequest1.setSortField("id");
+        chatHisRequest1.setSortOrder("ascend");
+        chatHisRequest1.setPageSize(chatHisRequest.getPageSize());
 
         userAiChatList.forEach(userAiChat -> {
             ChatHisListVo chatHisListVo = new ChatHisListVo();

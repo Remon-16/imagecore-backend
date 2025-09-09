@@ -2,6 +2,7 @@ package com.tech.imagecorebackenduserservice.domain.user.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tech.imagecorebackendmodel.dto.user.UserChangeScoreRequest;
 import com.tech.imagecorebackendmodel.dto.user.UserQueryRequest;
 import com.tech.imagecorebackendmodel.dto.user.UserUpdateInfoRequest;
 import com.tech.imagecorebackendmodel.user.entity.User;
@@ -132,4 +133,6 @@ public interface UserDomainService {
      * @return
      */
     boolean updateUserAvatar(MultipartFile avatar, UserUpdateInfoRequest userUpdateInfoRequest, User loginUser);
+
+    void userAddScore(UserChangeScoreRequest userChangeScoreRequest);
 }

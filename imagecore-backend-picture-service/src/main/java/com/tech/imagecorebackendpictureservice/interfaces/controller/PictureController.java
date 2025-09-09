@@ -6,6 +6,7 @@ import com.tech.imagecorebackendcommon.annotation.AddScore;
 import com.tech.imagecorebackendcommon.annotation.AuthCheck;
 import com.tech.imagecorebackendcommon.annotation.DeductScore;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.AliYunAiApi;
+import com.tech.imagecorebackendpictureservice.api.aliyunai.Text2ImageApi;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.model.*;
 import com.tech.imagecorebackendpictureservice.api.imagesearch.ImageSearchApiFacade;
 import com.tech.imagecorebackendpictureservice.api.imagesearch.model.ImageSearchResult;
@@ -55,6 +56,9 @@ public class PictureController {
 
     @Resource
     private AliYunAiApi aliYunAiApi;
+
+    @Resource
+    private Text2ImageApi text2ImageApi;
 
     @Resource
     private SpaceFeignClient spaceFeignClient;
@@ -399,11 +403,18 @@ public class PictureController {
             value = -10L,
             maxCount = 10L)
     @PostMapping("/text_gen/create_task")
-    public BaseResponse<Text2ImageTaskResponse> createPictureByText(Text2ImageTaskRequest text2ImageTaskRequest, HttpServletRequest request) {
+    public BaseResponse<Text2ImageTaskResponse> createPictureByText(@RequestBody Text2ImageTaskRequest text2ImageTaskRequest, HttpServletRequest request) {
         if (text2ImageTaskRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         Text2ImageTaskResponse text2ImageTaskResponse = pictureApplicationService.createText2ImageTask(text2ImageTaskRequest);
         return ResultUtils.success(text2ImageTaskResponse);
+    }
+
+    @GetMapping("/text_gen/get_task")
+    public BaseResponse<GeText2ImageTaskResponse> getText2ImageTask(String taskId){
+        ThrowUtils.throwIf(StrUtil.isBlank(taskId), ErrorCode.PARAMS_ERROR);
+        GeText2ImageTaskResponse geText2ImageTaskResponse = text2ImageApi.getText2ImageTask(taskId);
+        return ResultUtils.success(geText2ImageTaskResponse);
     }
 }

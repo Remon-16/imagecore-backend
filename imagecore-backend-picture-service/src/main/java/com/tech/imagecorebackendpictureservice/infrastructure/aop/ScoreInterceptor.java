@@ -4,6 +4,7 @@ import com.tech.imagecorebackendcommon.annotation.AddScore;
 import com.tech.imagecorebackendcommon.annotation.DeductScore;
 import com.tech.imagecorebackendcommon.exception.BusinessException;
 import com.tech.imagecorebackendcommon.exception.ErrorCode;
+import com.tech.imagecorebackendmodel.dto.user.UserChangeScoreRequest;
 import com.tech.imagecorebackendmodel.dto.user.UserScoreRequest;
 import com.tech.imagecorebackendmodel.user.constant.UserScoreConstant;
 import com.tech.imagecorebackendmodel.user.entity.User;
@@ -43,27 +44,11 @@ public class ScoreInterceptor {
 
     @Around("@annotation(addScore)")
     public Object addScoreInterceptor(ProceedingJoinPoint joinPoint, AddScore addScore) throws Throwable {
-        try {
-            long score = addScore.value();
-            String type = addScore.type();
-            long maxCount = addScore.maxCount();
-
-            User loginUser = this.getLoginUser();
-            UserScoreRequest userScoreRequest = new UserScoreRequest();
-            userScoreRequest.setScoreType(type);
-            userScoreRequest.setUserId(loginUser.getId());
-            String lock = String.valueOf(loginUser.getId()).intern();
-            synchronized (lock) {
-                Long curScoreCount = userFeignClient.getUserAddScoreCount(userScoreRequest);
-                if(UserScoreConstant.NO_LIMITATION.equals(maxCount) ||curScoreCount < maxCount){
-                    userScoreRequest.setScore(score);
-                    userFeignClient.userScoreChange(userScoreRequest);
-                    log.info("增加积分成功: 用户={}, 积分={}, 类型={}", loginUser.getId(), score, type);
-                }
-            }
-        } catch (Exception e) {
-            log.error("积分增加失败", e);
-        }
+        User loginUser = this.getLoginUser();
+        UserChangeScoreRequest userChangeScoreRequest = new UserChangeScoreRequest();
+        userChangeScoreRequest.setUserId(loginUser.getId());
+        userChangeScoreRequest.setScoreType(addScore.type());
+        userFeignClient.userAddScore(userChangeScoreRequest);
         return joinPoint.proceed();
     }
 

@@ -23,6 +23,11 @@ public class PictureCommentApplicationServiceImpl implements PictureCommentAppli
     }
 
     @Override
+    public Boolean deletePictureComment(PictureCommentRequest pictureCommentRequest) {
+        return pictureCommentDomainService.deletePictureComment(pictureCommentRequest);
+    }
+
+    @Override
     public List<PictureCommentRootVo> getPictureCommentRootVo(PictureCommentQueryRequest pictureCommentQueryRequest) {
         return pictureCommentDomainService.getPictureCommentRootVo(pictureCommentQueryRequest);
     }

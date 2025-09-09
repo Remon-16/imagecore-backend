@@ -56,20 +56,9 @@ public class GeText2ImageTaskResponse {
         private TaskMetrics taskMetrics;
 
         /**
-         * 任务结果列表，包括图像URL、部分任务执行失败报错信息等。
-         * {
-         *     "results": [
-         *         {
-         *             "url": ""
-         *         },
-         *         {
-         *             "code": "",
-         *             "message": ""
-         *         }
-         *     ]
-         * }
+         * 任务结果列表，包括图像URL和提示词。
          */
-        private List<Object> results;
+        private List<Text2ImageResult> results;
     }
 
     /**

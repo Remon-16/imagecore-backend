@@ -1,5 +1,6 @@
 package com.tech.imagecorebackenduserservice.interfaces.controller.inner;
 
+import com.tech.imagecorebackendmodel.dto.user.UserChangeScoreRequest;
 import com.tech.imagecorebackendmodel.dto.user.UserScoreRequest;
 import com.tech.imagecorebackendmodel.user.entity.ScoreUser;
 import com.tech.imagecorebackendmodel.user.entity.User;
@@ -59,6 +60,12 @@ public class UserInnerController implements UserFeignClient {
     @PostMapping("/score/batchUpdateScore")
     public void batchUpdateScore(@RequestBody Map<Long, Long> scoreMap) {
         userApplicationService.batchUpdateScore(scoreMap);
+    }
+
+    @Override
+    @PostMapping("/score/userAddScore")
+    public void userAddScore(UserChangeScoreRequest userChangeScoreRequest) {
+        userApplicationService.userAddScore(userChangeScoreRequest);
     }
 
     @Override

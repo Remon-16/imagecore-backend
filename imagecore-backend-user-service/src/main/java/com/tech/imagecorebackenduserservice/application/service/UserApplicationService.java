@@ -3,10 +3,7 @@ package com.tech.imagecorebackenduserservice.application.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tech.imagecorebackendcommon.common.DeleteRequest;
-import com.tech.imagecorebackendmodel.dto.user.UserLoginRequest;
-import com.tech.imagecorebackendmodel.dto.user.UserQueryRequest;
-import com.tech.imagecorebackendmodel.dto.user.UserRegisterRequest;
-import com.tech.imagecorebackendmodel.dto.user.UserUpdateInfoRequest;
+import com.tech.imagecorebackendmodel.dto.user.*;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.user.LoginUserVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
@@ -111,6 +108,8 @@ public interface UserApplicationService {
     List<User> listByIds(Set<Long> userIdSet);
 
     long saveUser(User userEntity);
+
+    void userAddScore(UserChangeScoreRequest userChangeScoreRequest);
 
     User getUserFromRequest(HttpServletRequest request);
 

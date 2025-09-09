@@ -14,6 +14,8 @@ public interface PictureCommentDomainService {
 
     PictureComment saveOrUpdatePictureComment(PictureCommentRequest pictureCommentRequest);
 
+    Boolean deletePictureComment(PictureCommentRequest pictureCommentRequest);
+
     QueryWrapper<PictureComment> getQueryWrapper(PictureCommentQueryRequest pictureCommentQueryRequest);
 
     List<PictureCommentRootVo> getPictureCommentRootVo(PictureCommentQueryRequest pictureCommentQueryRequest);

@@ -11,6 +11,8 @@ import java.util.List;
 public interface PictureCommentApplicationService {
     PictureComment saveOrUpdatePictureComment(PictureCommentRequest pictureCommentRequest);
 
+    Boolean deletePictureComment(PictureCommentRequest pictureCommentRequest);
+
     List<PictureCommentRootVo> getPictureCommentRootVo(PictureCommentQueryRequest pictureCommentQueryRequest);
 
     List<PictureCommentVo> getPictureCommentVo(PictureCommentQueryRequest pictureCommentQueryRequest);

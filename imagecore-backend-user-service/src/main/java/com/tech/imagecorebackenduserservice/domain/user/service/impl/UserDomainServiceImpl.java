@@ -14,12 +14,15 @@ import com.tech.imagecorebackendcommon.exception.ErrorCode;
 import com.tech.imagecorebackendcommon.exception.ThrowUtils;
 import com.tech.imagecorebackendcommon.utils.CacheUtils;
 import com.tech.imagecorebackendcommon.utils.JwtUtils;
+import com.tech.imagecorebackendmodel.dto.user.UserChangeScoreRequest;
 import com.tech.imagecorebackendmodel.dto.user.UserQueryRequest;
 import com.tech.imagecorebackendmodel.dto.user.UserUpdateInfoRequest;
 import com.tech.imagecorebackendmodel.user.constant.UserConstant;
+import com.tech.imagecorebackendmodel.user.constant.UserScoreConstant;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.user.valueobject.UserRedisLuaScriptConstant;
 import com.tech.imagecorebackendmodel.user.valueobject.UserRoleEnum;
+import com.tech.imagecorebackendmodel.user.valueobject.UserScoreEnum;
 import com.tech.imagecorebackendmodel.user.valueobject.UserVipEnum;
 import com.tech.imagecorebackendmodel.vo.user.LoginUserVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
@@ -323,8 +326,9 @@ public class UserDomainServiceImpl implements UserDomainService {
         // 缓存没有，查数据库
         if (userScore == null) {
             userScore = userRepository.getById(userId).getUserScore();
+            userCacheHandler.setUserCore(userScoreKey, userScore);
         }
-        return userScore >= score;
+        return userScore >= Math.abs(score);
     }
 
     @Override
@@ -362,6 +366,27 @@ public class UserDomainServiceImpl implements UserDomainService {
         user.setUserAvatar(url);
         userRepository.updateById(user);
         return true;
+    }
+
+    @Override
+    public void userAddScore(UserChangeScoreRequest userChangeScoreRequest) {
+        try {
+            UserScoreEnum userScoreEnum = UserScoreEnum.getEnumByScoreType(userChangeScoreRequest.getScoreType());
+            long score = userScoreEnum.getScore();
+            long maxCount = userScoreEnum.getMaxCount();
+            String type = userChangeScoreRequest.getScoreType();
+            String scoreAddCountKey = CacheUtils.getUserScoreCountKey(type, userChangeScoreRequest.getUserId().toString());
+            String lock = String.valueOf(userChangeScoreRequest.getUserId()).intern();
+            synchronized (lock) {
+                Long curScoreCount = userCacheHandler.getUserAddScoreCount(scoreAddCountKey);
+                if(UserScoreConstant.NO_LIMITATION.equals(maxCount) ||curScoreCount < maxCount){
+                    this.userScoreChange(userChangeScoreRequest.getUserId(), type, score);
+                    log.info("增加积分成功: 用户={}, 积分={}, 类型={}", userChangeScoreRequest.getUserId(), score, type);
+                }
+            }
+        } catch (Exception e) {
+            log.error("积分增加失败", e);
+        }
     }
 }
 
