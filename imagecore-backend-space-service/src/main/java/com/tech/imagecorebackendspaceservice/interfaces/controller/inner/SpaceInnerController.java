@@ -52,7 +52,7 @@ public class SpaceInnerController implements SpaceFeignClient {
     }
 
     @Override
-    public List<String> getPermissionList(PermissionListRequest permissionListRequest) {
+    public List<String> getPermissionList(@RequestBody PermissionListRequest permissionListRequest) {
         return spaceUserAuthManager.getPermissionList(
                 permissionListRequest.getSpace(),
                 permissionListRequest.getLoginUser()

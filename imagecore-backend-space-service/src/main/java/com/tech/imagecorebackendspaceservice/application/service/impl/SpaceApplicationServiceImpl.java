@@ -20,6 +20,7 @@ import com.tech.imagecorebackendmodel.space.valueobject.SpaceRoleEnum;
 import com.tech.imagecorebackendmodel.space.valueobject.SpaceTypeEnum;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.space.SpaceVO;
+import com.tech.imagecorebackendmodel.vo.user.UserListVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
 import com.tech.imagecorebackendserviceclient.application.service.UserFeignClient;
 import com.tech.imagecorebackendspaceservice.application.service.SpaceApplicationService;
@@ -52,7 +53,7 @@ public class SpaceApplicationServiceImpl extends ServiceImpl<SpaceMapper, Space>
     private SpaceDomainService spaceDomainService;
 
     @Resource
-    private UserFeignClient userApplicationService;
+    private UserFeignClient userFeignClient;
 
     @Resource
     private SpaceUserApplicationService spaceUserApplicationService;
@@ -137,8 +138,8 @@ public class SpaceApplicationServiceImpl extends ServiceImpl<SpaceMapper, Space>
         // 关联查询用户信息
         Long userId = space.getUserId();
         if (userId != null && userId > 0) {
-            User user = userApplicationService.getUserById(userId);
-            UserVO userVO = userApplicationService.getUserVO(user);
+            User user = userFeignClient.getUserById(userId);
+            UserVO userVO = userFeignClient.getUserVO(user);
             spaceVO.setUser(userVO);
         }
         return spaceVO;
@@ -159,7 +160,9 @@ public class SpaceApplicationServiceImpl extends ServiceImpl<SpaceMapper, Space>
         // 1,2,3,4
         Set<Long> userIdSet = spaceList.stream().map(Space::getUserId).collect(Collectors.toSet());
         // 1 => user1, 2 => user2
-        Map<Long, List<User>> userIdUserListMap = userApplicationService.listByIds(userIdSet).stream()
+        UserListVO userListVO = userFeignClient.listByIds(userIdSet);
+        List<User> userList = userListVO.getUserList(userListVO.getUserListJson());
+        Map<Long, List<User>> userIdUserListMap = userList.stream()
                 .collect(Collectors.groupingBy(User::getId));
         // 2. 填充信息
         spaceVOList.forEach(spaceVO -> {
@@ -168,7 +171,7 @@ public class SpaceApplicationServiceImpl extends ServiceImpl<SpaceMapper, Space>
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
-            spaceVO.setUser(userApplicationService.getUserVO(user));
+            spaceVO.setUser(userFeignClient.getUserVO(user));
         });
         spaceVOPage.setRecords(spaceVOList);
         return spaceVOPage;

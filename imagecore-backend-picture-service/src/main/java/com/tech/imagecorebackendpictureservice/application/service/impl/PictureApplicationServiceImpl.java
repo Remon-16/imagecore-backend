@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
+import com.tech.imagecorebackendmodel.vo.user.UserListVO;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.tech.imagecorebackendcommon.exception.BusinessException;
 import com.tech.imagecorebackendcommon.exception.ErrorCode;
@@ -46,6 +47,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -62,7 +64,7 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
     private PictureDomainService pictureDomainService;
 
     @Resource
-    private UserFeignClient userApplicationService;
+    private UserFeignClient userFeignClient;
 
     @Resource
     private ThumbDomainService thumbDomainService;
@@ -72,6 +74,8 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
 
     @Resource
     private SpaceFeignClient spaceFeignClient;
+
+    private final Map<String, Object> lockMap = new ConcurrentHashMap<>();
 
     @Override
     public void validPicture(Picture picture) {
@@ -93,8 +97,8 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
         // 关联查询用户信息
         Long userId = picture.getUserId();
         if (userId != null && userId > 0) {
-            User user = userApplicationService.getUserById(userId);
-            UserVO userVO = userApplicationService.getUserVO(user);
+            User user = userFeignClient.getUserById(userId);
+            UserVO userVO = userFeignClient.getUserVO(user);
             pictureVO.setUser(userVO);
         }
         return pictureVO;
@@ -118,7 +122,9 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
         // 1,2,3,4
         Set<Long> userIdSet = pictureList.stream().map(Picture::getUserId).collect(Collectors.toSet());
         // 1 => user1, 2 => user2
-        Map<Long, List<User>> userIdUserListMap = userApplicationService.listByIds(userIdSet).stream()
+        UserListVO userListVO = userFeignClient.listByIds(userIdSet);
+        List<User> userList = userListVO.getUserList(userListVO.getUserListJson());
+        Map<Long, List<User>> userIdUserListMap = userList.stream()
                 .collect(Collectors.groupingBy(User::getId));
         // 2. 填充信息
         pictureVOList.forEach(pictureVO -> {
@@ -127,7 +133,7 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
-            pictureVO.setUser(userApplicationService.getUserVO(user));
+            pictureVO.setUser(userFeignClient.getUserVO(user));
         });
         pictureVOPage.setRecords(pictureVOList);
         return pictureVOPage;
@@ -225,6 +231,35 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
         }
     }
 
+    public Page<PictureVO> queryCachePage(PictureQueryRequest pictureQueryRequest, HttpServletRequest request){
+        // 1 先从缓存中查图片的数据
+        String queryKey = CacheUtils.getPictureQueryCacheKey(pictureQueryRequest);
+        Object queryValue = cacheManager.getValueCache(queryKey);
+        if(queryValue == null){
+            return null;
+        }
+        User loginUser;
+        try{
+            loginUser = userFeignClient.getUserFromRequest(request);
+        }catch (Exception e){
+            loginUser = null;
+        }
+        Page<PictureVO> pictureVOPage = null;
+        List<PictureVO> pictureVOList = null;
+        // 1.2 如果缓存命中，根据图片的数据，获取图片点赞数量
+        pictureVOPage = JSONUtil.toBean(
+                (String) queryValue,
+                new TypeReference<Page<PictureVO>>() {}, // 指定完整泛型结构
+                false // 是否忽略转换错误
+        );
+        // 1.3 如果缓存命中，如果用户登录了，从缓存中获取用户点赞的数据
+        pictureVOList = setNewThumbCount(pictureVOPage.getRecords());
+        pictureVOList = setThumbState(pictureVOList, loginUser);
+        pictureVOPage.setRecords(pictureVOList);
+        // 1.4 返回结果
+        return pictureVOPage;
+    }
+
     @Override
     public Page<PictureVO> listPictureVOByPage(PictureQueryRequest pictureQueryRequest, HttpServletRequest request) {
         long current = pictureQueryRequest.getCurrent();
@@ -234,101 +269,138 @@ public class PictureApplicationServiceImpl extends ServiceImpl<PictureMapper, Pi
         // 普通用户默认只能看到审核通过的数据
         pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
 
-        User loginUser = userApplicationService.getUserFromRequest(request);
-        // 1 先从缓存中查图片的数据
-        String queryKey = CacheUtils.getPictureQueryCacheKey(pictureQueryRequest);
-
-        Object queryValue = cacheManager.getValueCache(queryKey);
-        Page<PictureVO> pictureVOPage = null;
-        List<PictureVO> pictureVOList = null;
-        if (queryValue != null) {
-            // 1.2 如果缓存命中，根据图片的数据，获取图片点赞数量
-            pictureVOPage = JSONUtil.toBean(
-                    (String) queryValue,
-                    new TypeReference<Page<PictureVO>>() {}, // 指定完整泛型结构
-                    false // 是否忽略转换错误
-            );
-            // 1.3 如果缓存命中，如果用户登录了，从缓存中获取用户点赞的数据
-            pictureVOList = setNewThumbCount(pictureVOPage.getRecords());
-            pictureVOList = setThumbState(pictureVOList, loginUser);
-            pictureVOPage.setRecords(pictureVOList);
-            // 1.4 返回结果
-            return pictureVOPage;
+        User loginUser;
+        try{
+            loginUser = userFeignClient.getUserFromRequest(request);
+        }catch (Exception e){
+            loginUser = null;
         }
-        // 2.1 如果缓存没有命中，直接从数据库里查询
-        Page<Picture> picturePage = page(new Page<>(current, size),
-                getQueryWrapper(pictureQueryRequest));
-        pictureVOPage = getPictureVOPage(picturePage, request);
-        pictureVOList = pictureVOPage.getRecords();
-        pictureVOList = setThumbState(pictureVOList, loginUser);
-        // 2.2 尝试从缓存中获取最新的点赞数量
-        pictureVOPage.setRecords(setNewThumbCount(pictureVOPage.getRecords()));
-        // 2.3 写入 Redis
-        String cacheValue = JSONUtil.toJsonStr(pictureVOPage);
-        cacheManager.putValueToCache(queryKey, cacheValue);
-        // 2.4 返回结果
-        return pictureVOPage;
+
+        Page<PictureVO> pictureVOPage = queryCachePage(pictureQueryRequest, request);
+
+        if (pictureVOPage != null) {
+            // 返回结果
+            return pictureVOPage;
+        }else{
+            List<PictureVO> pictureVOList = null;
+            String lockStr = CacheUtils.getHexLockString(pictureQueryRequest);
+            Object lock = lockMap.computeIfAbsent(lockStr, key -> new Object());
+            synchronized (lock) {
+                pictureVOPage = queryCachePage(pictureQueryRequest, request);
+                if (pictureVOPage == null) {
+                    try {
+                        // 2.1 如果缓存没有命中，直接从数据库里查询
+                        Page<Picture> picturePage = page(new Page<>(current, size),
+                                getQueryWrapper(pictureQueryRequest));
+                        pictureVOPage = getPictureVOPage(picturePage, request);
+                        pictureVOList = pictureVOPage.getRecords();
+                        pictureVOList = setThumbState(pictureVOList, loginUser);
+                        // 2.2 尝试从缓存中获取最新的点赞数量
+                        pictureVOPage.setRecords(setNewThumbCount(pictureVOPage.getRecords()));
+                        String queryKey = CacheUtils.getPictureQueryCacheKey(pictureQueryRequest);
+                        // 2.3 写入 Redis
+                        String cacheValue = JSONUtil.toJsonStr(pictureVOPage);
+                        cacheManager.putValueToCache(queryKey, cacheValue);
+                    } catch (Exception e) {
+                        throw new BusinessException(ErrorCode.PARAMS_ERROR);
+                    } finally {
+                        // 防止内存泄漏
+                        lockMap.remove(lockStr);
+                    }
+                }else {
+                    // 防止内存泄漏
+                    lockMap.remove(lockStr);
+                }
+                return pictureVOPage;
+            }
+        }
+    }
+
+    private PictureVO getCache(long id, HttpServletRequest request){
+        String pictureQueryCacheKey = CacheUtils.getSinglePictureQueryCacheKey(id);
+        Object queryValue = cacheManager.getValueCache(pictureQueryCacheKey);
+        if(queryValue == null){
+            return null;
+        }
+        User loginUser = userFeignClient.getUserFromRequest(request);
+        PictureVO pictureVO = JSONUtil.toBean((String) queryValue, PictureVO.class);;
+        String pictureThumbCountKey = CacheUtils.getPictureCacheKey(String.valueOf(id));
+        Object thumbCountValue = cacheManager.getValueCache(pictureThumbCountKey);
+        if (thumbCountValue != null) {
+            pictureVO.setThumbCount(Long.parseLong(thumbCountValue.toString()));
+        }
+        Boolean userHasThumb = thumbDomainService.hasThumb(pictureVO.getId(), loginUser.getId());
+        pictureVO.setHasThumb(userHasThumb);
+        Space space = pictureVO.getSpace();
+        PermissionListRequest permissionListRequest = new PermissionListRequest();
+        permissionListRequest.setSpace(space);
+        permissionListRequest.setLoginUser(loginUser);
+        List<String> permissionList = spaceFeignClient.getPermissionList(permissionListRequest);
+        pictureVO.setPermissionList(permissionList);
+        return pictureVO;
     }
 
     @Override
     public PictureVO getPictureVOById(long id, HttpServletRequest request) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         // 1. 查询缓存
-        PictureVO pictureVO = null;
-        Space space = null;
-        List<String> permissionList = null;
-        Boolean userHasThumb = null;
-        String pictureQueryCacheKey = CacheUtils.getSinglePictureQueryCacheKey(id);
-        Object queryValue = cacheManager.getValueCache(pictureQueryCacheKey);
-        User loginUser = userApplicationService.getUserFromRequest(request);
-        if (queryValue != null) {
-            pictureVO = JSONUtil.toBean((String) queryValue, PictureVO.class);;
-            String pictureThumbCountKey = CacheUtils.getPictureCacheKey(String.valueOf(id));
-            Object thumbCountValue = cacheManager.getValueCache(pictureThumbCountKey);
-            if (thumbCountValue != null) {
-                pictureVO.setThumbCount(Long.parseLong(thumbCountValue.toString()));
+        PictureVO pictureVO = getCache(id, request);
+        if (pictureVO == null) {
+            String lockStr = CacheUtils.getHexLockString(id);
+            Object lock = lockMap.computeIfAbsent(lockStr, key -> new Object());
+            synchronized (lock) {
+                pictureVO = getCache(id, request);
+                if (pictureVO == null) {
+                    try {
+                        Space space = null;
+                        List<String> permissionList = null;
+                        Boolean userHasThumb = null;
+                        String pictureQueryCacheKey = CacheUtils.getSinglePictureQueryCacheKey(id);
+                        User loginUser = userFeignClient.getUserFromRequest(request);
+                        // 2. 缓存没命中，查询数据库
+                        Picture picture = getById(id);
+                        ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
+                        // 空间权限校验
+                        Long spaceId = picture.getSpaceId();
+                        if (spaceId != null) {
+                            Space space1 = spaceFeignClient.getById(spaceId);
+                            SpaceUserAuthRequest spaceUserAuthRequest = new SpaceUserAuthRequest();
+                            spaceUserAuthRequest.setSpace(space1);
+                            spaceUserAuthRequest.setLoginUser(loginUser);
+                            spaceUserAuthRequest.setNeedPermission(SpaceUserPermissionConstant.PICTURE_VIEW);
+                            ThrowUtils.throwIf(!spaceFeignClient.hasPermission(spaceUserAuthRequest),
+                                    ErrorCode.OPERATION_ERROR, "无查询权限");
+                            space = spaceFeignClient.getById(spaceId);
+                            ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
+                        }
+                        // 获取权限列表
+                        PermissionListRequest permissionListRequest = new PermissionListRequest();
+                        permissionListRequest.setSpace(space);
+                        permissionListRequest.setLoginUser(loginUser);
+                        permissionList = spaceFeignClient.getPermissionList(permissionListRequest);
+                        pictureVO = getPictureVO(picture, request);
+                        pictureVO.setPermissionList(permissionList);
+                        pictureVO.setSpace(space);
+                        userHasThumb = thumbDomainService.hasThumb(pictureVO.getId(), loginUser.getId());
+                        pictureVO.setHasThumb(userHasThumb);
+                        // 存缓存
+                        String cacheValue = JSONUtil.toJsonStr(pictureVO);
+                        cacheManager.putValueToCache(pictureQueryCacheKey, cacheValue);
+                    } catch (Exception e) {
+                        throw new BusinessException(ErrorCode.PARAMS_ERROR);
+                    } finally {
+                        // 防止内存泄漏
+                        lockMap.remove(lockStr);
+                    }
+                }else {
+                    // 防止内存泄漏
+                    lockMap.remove(lockStr);
+                }
             }
-            userHasThumb = thumbDomainService.hasThumb(pictureVO.getId(), loginUser.getId());
-            pictureVO.setHasThumb(userHasThumb);
-            space = pictureVO.getSpace();
-            PermissionListRequest permissionListRequest = new PermissionListRequest();
-            permissionListRequest.setSpace(space);
-            permissionListRequest.setLoginUser(loginUser);
-            permissionList = spaceFeignClient.getPermissionList(permissionListRequest);
-            pictureVO.setPermissionList(permissionList);
-            return pictureVO;
         }
-        // 2. 缓存没命中，查询数据库
-        Picture picture = getById(id);
-        ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
-        // 空间权限校验
-        Long spaceId = picture.getSpaceId();
-        if (spaceId != null) {
-            Space space1 = spaceFeignClient.getById(spaceId);
-            SpaceUserAuthRequest spaceUserAuthRequest = new SpaceUserAuthRequest();
-            spaceUserAuthRequest.setSpace(space1);
-            spaceUserAuthRequest.setLoginUser(loginUser);
-            spaceUserAuthRequest.setNeedPermission(SpaceUserPermissionConstant.PICTURE_VIEW);
-            ThrowUtils.throwIf(!spaceFeignClient.hasPermission(spaceUserAuthRequest),
-                    ErrorCode.OPERATION_ERROR, "无查询权限");
-            space = spaceFeignClient.getById(spaceId);
-            ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
-        }
-        // 获取权限列表
-        PermissionListRequest permissionListRequest = new PermissionListRequest();
-        permissionListRequest.setSpace(space);
-        permissionListRequest.setLoginUser(loginUser);
-        permissionList = spaceFeignClient.getPermissionList(permissionListRequest);
-        pictureVO = getPictureVO(picture, request);
-        pictureVO.setPermissionList(permissionList);
-        pictureVO.setSpace(space);
-        userHasThumb = thumbDomainService.hasThumb(pictureVO.getId(), loginUser.getId());
-        pictureVO.setHasThumb(userHasThumb);
-        // 存缓存
-        String cacheValue = JSONUtil.toJsonStr(pictureVO);
-        cacheManager.putValueToCache(pictureQueryCacheKey, cacheValue);
         return pictureVO;
     }
+
 
     /**
      * 根据请求对象封装查询条件

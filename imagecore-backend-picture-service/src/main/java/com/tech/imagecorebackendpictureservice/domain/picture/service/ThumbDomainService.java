@@ -20,7 +20,7 @@ public interface ThumbDomainService extends IService<Thumb> {
 
     Boolean undoThumb(DoThumbRequest doThumbRequest, User loginUser);
 
-    Boolean hasThumb(Long blogId, Long userId);
+    Boolean hasThumb(Long pictureId, Long userId);
 
     List<PictureVO> getPictureThumbState(List<PictureVO> pictureVOList, User loginUser);
 

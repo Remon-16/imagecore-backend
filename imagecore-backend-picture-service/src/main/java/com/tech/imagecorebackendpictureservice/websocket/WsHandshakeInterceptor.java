@@ -11,6 +11,7 @@ import com.tech.imagecorebackendmodel.picture.entity.Picture;
 import com.tech.imagecorebackendmodel.space.entity.Space;
 import com.tech.imagecorebackendmodel.space.valueobject.SpaceTypeEnum;
 import com.tech.imagecorebackendmodel.user.entity.User;
+import com.tech.imagecorebackendpictureservice.application.service.PictureApplicationService;
 import com.tech.imagecorebackendserviceclient.application.service.PictureFeignClient;
 import com.tech.imagecorebackendserviceclient.application.service.SpaceFeignClient;
 import com.tech.imagecorebackendserviceclient.application.service.UserFeignClient;
@@ -39,11 +40,9 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
 
     @Resource
     private SecretKey secretKey;
-    @Resource
-    private UserFeignClient userFeignClient;
 
     @Resource
-    private PictureFeignClient pictureFeignClient;
+    private PictureApplicationService pictureApplicationService;
 
     @Resource
     private SpaceFeignClient spaceFeignClient;
@@ -105,7 +104,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
                 return false;
             }
             // 校验用户是否有编辑当前图片的权限
-            Picture picture = pictureFeignClient.getById(Long.valueOf(pictureId));
+            Picture picture = pictureApplicationService.getById(Long.valueOf(pictureId));
             if (ObjUtil.isEmpty(picture)) {
                 log.error("图片不存在，拒绝握手");
                 return false;

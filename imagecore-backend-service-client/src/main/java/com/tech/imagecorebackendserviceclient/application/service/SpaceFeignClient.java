@@ -32,9 +32,9 @@ public interface SpaceFeignClient {
     boolean reduceUsage(@RequestBody SpaceReduceUsageRequest spaceReduceUsageRequest);
 
     @PostMapping("/auth/has_permission")
-    Boolean hasPermission(SpaceUserAuthRequest spaceUserAuthRequest);
+    Boolean hasPermission(@RequestBody SpaceUserAuthRequest spaceUserAuthRequest);
 
     @PostMapping("/auth/get_permission_lisy")
-    List<String> getPermissionList(PermissionListRequest permissionListRequest);
+    List<String> getPermissionList(@RequestBody PermissionListRequest permissionListRequest);
 
 }

@@ -1,5 +1,6 @@
 package com.tech.imagecorebackendpictureservice.application.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tech.imagecorebackendmodel.dto.picture.PictureCommentQueryRequest;
 import com.tech.imagecorebackendmodel.dto.picture.PictureCommentRequest;
 import com.tech.imagecorebackendmodel.picture.entity.PictureComment;
@@ -28,12 +29,17 @@ public class PictureCommentApplicationServiceImpl implements PictureCommentAppli
     }
 
     @Override
-    public List<PictureCommentRootVo> getPictureCommentRootVo(PictureCommentQueryRequest pictureCommentQueryRequest) {
+    public Page<PictureCommentRootVo> getPictureCommentRootVo(PictureCommentQueryRequest pictureCommentQueryRequest) {
         return pictureCommentDomainService.getPictureCommentRootVo(pictureCommentQueryRequest);
     }
 
     @Override
-    public List<PictureCommentVo> getPictureCommentVo(PictureCommentQueryRequest pictureCommentQueryRequest) {
+    public Page<PictureCommentVo> getPictureCommentVo(PictureCommentQueryRequest pictureCommentQueryRequest) {
         return pictureCommentDomainService.getPictureCommentVo(pictureCommentQueryRequest);
+    }
+
+    @Override
+    public PictureComment getById(Long pictureCommentId) {
+        return pictureCommentDomainService.getById(pictureCommentId);
     }
 }

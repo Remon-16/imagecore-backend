@@ -6,8 +6,10 @@ import com.tech.imagecorebackendcommon.exception.BusinessException;
 import com.tech.imagecorebackendcommon.exception.ErrorCode;
 import com.tech.imagecorebackendmodel.dto.user.UserChangeScoreRequest;
 import com.tech.imagecorebackendmodel.dto.user.UserScoreRequest;
+import com.tech.imagecorebackendmodel.user.entity.Message;
 import com.tech.imagecorebackendmodel.user.entity.ScoreUser;
 import com.tech.imagecorebackendmodel.user.entity.User;
+import com.tech.imagecorebackendmodel.vo.user.UserListVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -43,8 +45,8 @@ public interface UserFeignClient {
      * @param idList
      * @return
      */
-    @GetMapping("/get/ids")
-    List<User> listByIds(@RequestParam("idList") Collection<Long> idList);
+    @PostMapping("/post/ids")
+    UserListVO listByIds(@RequestBody Set<Long> idList);
 
 
     /**
@@ -107,15 +109,20 @@ public interface UserFeignClient {
     Long getUserAddScoreCount(@RequestBody UserScoreRequest userScoreRequest);
 
     @PostMapping("/score/checkScore")
-    Boolean checkScore(@RequestBody UserScoreRequest userScoreRequest);
+    String checkScore(@RequestBody UserScoreRequest userScoreRequest);
 
     @PostMapping("/score/batchUpdateScore")
     void batchUpdateScore(@RequestBody Map<Long, Long> scoreMap);
 
     @PostMapping("/score/userAddScore")
-    void userAddScore(UserChangeScoreRequest userChangeScoreRequest);
+    void userAddScore(@RequestBody UserChangeScoreRequest userChangeScoreRequest);
 
     @PostMapping("/scoreUser/saveBatch")
-    void saveBatch(List<ScoreUser> scoreUserList);
+    void saveBatch(@RequestBody List<ScoreUser> scoreUserList);
 
+    @PostMapping("/message/messageSend")
+    void messageSend(@RequestBody Message message);
+
+    @PostMapping("/message/messageBatchSend")
+    void messageBatchSend(@RequestBody List<Message> messageList);
 }

@@ -1,11 +1,16 @@
 package com.tech.imagecorebackenduserservice.interfaces.controller.inner;
 
+import cn.hutool.json.JSONUtil;
 import com.tech.imagecorebackendmodel.dto.user.UserChangeScoreRequest;
 import com.tech.imagecorebackendmodel.dto.user.UserScoreRequest;
+import com.tech.imagecorebackendmodel.user.constant.UserScoreConstant;
+import com.tech.imagecorebackendmodel.user.entity.Message;
 import com.tech.imagecorebackendmodel.user.entity.ScoreUser;
 import com.tech.imagecorebackendmodel.user.entity.User;
+import com.tech.imagecorebackendmodel.vo.user.UserListVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
 import com.tech.imagecorebackendserviceclient.application.service.UserFeignClient;
+import com.tech.imagecorebackenduserservice.application.service.MessageApplicationService;
 import com.tech.imagecorebackenduserservice.application.service.ScoreUserApplicationService;
 import com.tech.imagecorebackenduserservice.application.service.UserApplicationService;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +29,10 @@ public class UserInnerController implements UserFeignClient {
     private UserApplicationService userApplicationService;
 
     @Resource
-    ScoreUserApplicationService scoreUserApplicationService;
+    private ScoreUserApplicationService scoreUserApplicationService;
+
+    @Resource
+    private MessageApplicationService messageApplicationService;
 
     @Override
     @GetMapping("/get/id")
@@ -33,9 +41,12 @@ public class UserInnerController implements UserFeignClient {
     }
 
     @Override
-    @GetMapping("/get/ids")
-    public List<User> listByIds(@RequestParam("idList") Collection<Long> idList) {
-        return userApplicationService.listByIds((Set<Long>) idList);
+    @PostMapping("/post/ids")
+    public UserListVO listByIds(@RequestBody Set<Long> idList) {
+        UserListVO userListVO = new UserListVO();
+        List<User> userList = userApplicationService.listByIds(idList);
+        userListVO.setUserListJson(JSONUtil.toJsonStr(userList));
+        return userListVO;
     }
 
     @Override
@@ -52,8 +63,9 @@ public class UserInnerController implements UserFeignClient {
 
     @Override
     @PostMapping("/score/checkScore")
-    public Boolean checkScore(@RequestBody UserScoreRequest userScoreRequest) {
-        return userApplicationService.checkScore(userScoreRequest.getUserId(), userScoreRequest.getScore());
+    public String checkScore(@RequestBody UserScoreRequest userScoreRequest) {
+        boolean f = userApplicationService.checkScore(userScoreRequest.getUserId(), userScoreRequest.getScore());
+        return f? UserScoreConstant.YES : UserScoreConstant.NO;
     }
 
     @Override
@@ -64,13 +76,25 @@ public class UserInnerController implements UserFeignClient {
 
     @Override
     @PostMapping("/score/userAddScore")
-    public void userAddScore(UserChangeScoreRequest userChangeScoreRequest) {
+    public void userAddScore(@RequestBody UserChangeScoreRequest userChangeScoreRequest) {
         userApplicationService.userAddScore(userChangeScoreRequest);
     }
 
     @Override
     @PostMapping("/scoreUser/saveBatch")
-    public void saveBatch(List<ScoreUser> scoreUserList) {
+    public void saveBatch(@RequestBody List<ScoreUser> scoreUserList) {
         scoreUserApplicationService.saveBatch(scoreUserList);
+    }
+
+    @Override
+    @PostMapping("/message/messageSend")
+    public void messageSend(@RequestBody Message message) {
+        messageApplicationService.messageSend(message);
+    }
+
+    @Override
+    @PostMapping("/message/messageBatchSend")
+    public void messageBatchSend(@RequestBody List<Message> messageList) {
+        messageApplicationService.messageBatchSend(messageList);
     }
 }

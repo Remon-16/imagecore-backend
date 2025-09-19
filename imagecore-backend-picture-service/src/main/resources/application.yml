@@ -47,6 +47,14 @@ springdoc:
   group-configs:
     - group: 'default'
       packages-to-scan: com.tech.imagecorebackendpictureservice.interfaces.controller
+
+rocketmq:
+  name-server: 127.0.0.1:9876
+  producer:
+    group: producer
+  consumer:
+    group: canalGroup
+
 # knife4j
 knife4j:
   enable: true

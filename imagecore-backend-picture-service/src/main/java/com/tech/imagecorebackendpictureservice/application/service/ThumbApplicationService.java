@@ -1,5 +1,6 @@
 package com.tech.imagecorebackendpictureservice.application.service;
 
+import com.tech.imagecorebackendmodel.picture.entity.Thumb;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.dto.picture.DoThumbRequest;
 
@@ -8,5 +9,5 @@ public interface ThumbApplicationService {
 
     Boolean undoThumb(DoThumbRequest doThumbRequest, User loginUser);
 
-    Boolean hasThumb(Long blogId, Long userId);
+    Thumb getThumbById(Long thumbId);
 }

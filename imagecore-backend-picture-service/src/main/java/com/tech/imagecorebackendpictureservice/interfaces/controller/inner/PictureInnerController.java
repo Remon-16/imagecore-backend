@@ -3,8 +3,12 @@ package com.tech.imagecorebackendpictureservice.interfaces.controller.inner;
 import com.tech.imagecorebackendmodel.dto.space.analyze.*;
 import com.tech.imagecorebackendmodel.dto.user.UserUpdateInfoRequest;
 import com.tech.imagecorebackendmodel.picture.entity.Picture;
+import com.tech.imagecorebackendmodel.picture.entity.PictureComment;
+import com.tech.imagecorebackendmodel.picture.entity.Thumb;
 import com.tech.imagecorebackendmodel.vo.space.analyze.SpaceCategoryAnalyzeResponse;
 import com.tech.imagecorebackendpictureservice.application.service.PictureApplicationService;
+import com.tech.imagecorebackendpictureservice.application.service.PictureCommentApplicationService;
+import com.tech.imagecorebackendpictureservice.application.service.ThumbApplicationService;
 import com.tech.imagecorebackendserviceclient.application.service.PictureFeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +23,12 @@ import java.util.Map;
 public class PictureInnerController implements PictureFeignClient {
     @Resource
     private PictureApplicationService pictureApplicationService;
+
+    @Resource
+    private PictureCommentApplicationService pictureCommentApplicationService;
+
+    @Resource
+    private ThumbApplicationService thumbApplicationService;
 
     @Override
     @PostMapping("/picture_obj")
@@ -64,5 +74,17 @@ public class PictureInnerController implements PictureFeignClient {
     @PostMapping("/upload_user_avatar")
     public String uploadUserAvatar(MultipartFile multipartFile, String uploadPathPrefix) {
         return pictureApplicationService.uploadUserAvatar(multipartFile, uploadPathPrefix);
+    }
+
+    @Override
+    @GetMapping("/pictureComment/get/id")
+    public PictureComment getPictureCommentById(Long pictureCommentId) {
+        return pictureCommentApplicationService.getById(pictureCommentId);
+    }
+
+    @Override
+    @GetMapping("/thumb/get/id")
+    public Thumb getThumbById(Long thumbId) {
+        return thumbApplicationService.getThumbById(thumbId);
     }
 }

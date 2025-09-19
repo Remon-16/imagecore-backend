@@ -10,6 +10,8 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class MessageApplicationServiceImpl implements MessageApplicationService {
 
@@ -23,6 +25,11 @@ public class MessageApplicationServiceImpl implements MessageApplicationService 
     @Override
     public void messageSend(Message message) {
         messageDomainService.messageSend(message);
+    }
+
+    @Override
+    public void messageBatchSend(List<Message> messages) {
+        messageDomainService.messageBatchSend(messages);
     }
 
     @Override

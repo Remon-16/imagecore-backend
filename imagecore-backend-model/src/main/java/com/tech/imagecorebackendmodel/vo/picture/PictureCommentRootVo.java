@@ -1,5 +1,6 @@
 package com.tech.imagecorebackendmodel.vo.picture;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
 import lombok.Data;
 
@@ -41,5 +42,5 @@ public class PictureCommentRootVo {
     /**
      * 子评论
      */
-    List<PictureCommentVo> pictureCommentVos;
+    Page<PictureCommentVo> pictureCommentVos;
 }

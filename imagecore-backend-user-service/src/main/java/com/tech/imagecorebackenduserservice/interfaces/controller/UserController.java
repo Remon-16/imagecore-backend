@@ -10,11 +10,15 @@ import com.tech.imagecorebackendcommon.exception.BusinessException;
 import com.tech.imagecorebackendcommon.exception.ErrorCode;
 import com.tech.imagecorebackendcommon.exception.ThrowUtils;
 import com.tech.imagecorebackendmodel.dto.user.*;
+import com.tech.imagecorebackendmodel.user.constant.MessageConstant;
 import com.tech.imagecorebackendmodel.user.constant.UserConstant;
 import com.tech.imagecorebackendmodel.user.constant.UserScoreConstant;
+import com.tech.imagecorebackendmodel.user.entity.Message;
 import com.tech.imagecorebackendmodel.user.entity.User;
+import com.tech.imagecorebackendmodel.user.valueobject.MessageType;
 import com.tech.imagecorebackendmodel.vo.user.LoginUserVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
+import com.tech.imagecorebackenduserservice.application.service.MessageApplicationService;
 import com.tech.imagecorebackenduserservice.application.service.UserApplicationService;
 import com.tech.imagecorebackenduserservice.interfaces.assembler.UserAssembler;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +27,7 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -35,6 +40,9 @@ public class UserController {
 
     @Resource
     private UserApplicationService userApplicationService;
+
+    @Resource
+    private MessageApplicationService messageApplicationService;
 
     /**
      * 用户注册
@@ -178,21 +186,42 @@ public class UserController {
     }
 
     @DeductScore(type = UserScoreConstant.MONTH_VIP,
-            value = -30L,
+            value = -90L,
             maxCount = -1L)
     @PostMapping("/userSubscribesVip")
-    public BaseResponse<Boolean> userSubscribesVip(@RequestBody UserUpdateInfoRequest userUpdateInfoRequest){
+    public BaseResponse<Boolean> userSubscribesVip(@RequestBody UserUpdateRequest userUpdateRequest){
         User user = new User();
-        user.setId(userUpdateInfoRequest.getId());
-        user.setVipType(userUpdateInfoRequest.getVipType());
-        // 获取当前日期
-        LocalDate today = LocalDate.now();
+        user.setId(userUpdateRequest.getId());
+        user.setVipType(userUpdateRequest.getVipType());
+        User oldUser = userApplicationService.getUserById(userUpdateRequest.getId());
+        LocalDate startDate = null;
+
+        Date vipExpiry = oldUser.getVipExpiry();
+        if(vipExpiry != null){
+            Instant instant = vipExpiry.toInstant();
+            ZoneId zone = ZoneId.systemDefault();
+            startDate = instant.atZone(zone).toLocalDate();
+        }else {
+            startDate = LocalDate.now();
+        }
+
         // 获取当前日期后一个月的日期
-        LocalDate nextMonth = today.plusMonths(1);
+        LocalDate nextMonth = startDate.plusMonths(1);
         Instant instant = nextMonth.atTime(LocalTime.MIDNIGHT).atZone(ZoneId.systemDefault()).toInstant();
         Date date = Date.from(instant);
         user.setVipExpiry(date);
+
         userApplicationService.updateUser(user);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = sdf.format(date);
+
+        Message message = new Message();
+        message.setUserId(user.getId());
+        message.setMessageType(MessageType.SYSTEM.getValue());
+        message.setContent(MessageConstant.USER_VIP_MONTH_MESSAGE + formattedDate);
+        message.setSenderId(MessageConstant.SYSTEM_SENDER_ID);
+        message.setMessageState("0");
+        messageApplicationService.messageSend(message);
         return ResultUtils.success(true);
     }
 }

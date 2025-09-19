@@ -1,6 +1,7 @@
 package com.tech.imagecorebackendpictureservice.application.service.impl;
 
 
+import com.tech.imagecorebackendmodel.picture.entity.Thumb;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.dto.picture.DoThumbRequest;
 import com.tech.imagecorebackendpictureservice.application.service.ThumbApplicationService;
@@ -25,7 +26,7 @@ public class ThumbApplicationServiceImpl implements ThumbApplicationService {
     }
 
     @Override
-    public Boolean hasThumb(Long blogId, Long userId) {
-        return thumbDomainService.hasThumb(blogId, userId);
+    public Thumb getThumbById(Long thumbId) {
+        return thumbDomainService.getById(thumbId);
     }
 }

@@ -7,6 +7,8 @@ import com.tech.imagecorebackendmodel.user.entity.Message;
 import com.tech.imagecorebackendmodel.vo.user.MessageVo;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.List;
+
 
 public interface MessageDomainService {
 
@@ -15,6 +17,8 @@ public interface MessageDomainService {
     void changeMessageStatus(Long messageId, String status);
 
     void messageSend(Message message);
+
+    void messageBatchSend(List<Message> messages);
 
     void allMessageREAD(Long userId, String messageType);
 

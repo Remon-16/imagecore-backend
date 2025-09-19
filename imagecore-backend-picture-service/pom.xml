@@ -17,6 +17,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>3.2.4</spring-boot.version>
         <maven.compiler.parameters>true</maven.compiler.parameters>
+        <rocketmq-spring.version>2.2.3</rocketmq-spring.version>
+        <rocketmq.version>4.9.7</rocketmq.version>
     </properties>
     <dependencies>
         <dependency>
@@ -33,6 +35,69 @@
             <groupId>com.tech</groupId>
             <artifactId>imagecore-backend-service-client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <!-- Canal    -->
+        <dependency>
+            <groupId>com.alibaba.otter</groupId>
+            <artifactId>canal.client</artifactId>
+            <version>1.1.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.otter</groupId>
+            <artifactId>canal.protocol</artifactId>
+            <version>1.1.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-spring-boot-starter</artifactId>
+            <version>${rocketmq-spring.version}</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.apache.rocketmg</groupId>
+                <artifactId>rocketmg-acl</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.rocketmg</groupId>
+                <artifactId>rocketmg-client</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.rocketmg</groupId>
+                <artifactId>rocketmg-common</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.rocketmg</groupId>
+                <artifactId>rocketmg-remoting</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.rocketmg</groupId>
+                <artifactId>rocketmg-srvutil</artifactId>
+            </exclusion>
+        </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-acl</artifactId>
+            <version>${rocketmq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-client</artifactId>
+            <version>${rocketmq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-common</artifactId>
+            <version>${rocketmq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-remoting</artifactId>
+            <version>${rocketmq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-srvutil</artifactId>
+            <version>${rocketmq.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

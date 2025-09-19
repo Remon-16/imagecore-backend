@@ -5,7 +5,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.alibaba.otter.canal.protocol.CanalEntry;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.tech.imagecorebackendcommon.utils.CacheUtils;
 import com.tech.imagecorebackendpictureservice.api.CosManager;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.AliYunAiApi;
 import com.tech.imagecorebackendpictureservice.api.aliyunai.Text2ImageApi;
@@ -25,10 +27,13 @@ import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.picture.PictureVO;
 import com.tech.imagecorebackendpictureservice.domain.picture.repository.PictureRepository;
 import com.tech.imagecorebackendpictureservice.domain.picture.service.PictureDomainService;
+import com.tech.imagecorebackendpictureservice.infrastructure.dco.CacheManager;
+import com.tech.imagecorebackendpictureservice.infrastructure.dco.picture.PictureCacheHandler;
 import com.tech.imagecorebackendpictureservice.infrastructure.manager.upload.FilePictureUpload;
 import com.tech.imagecorebackendpictureservice.infrastructure.manager.upload.PictureUploadTemplate;
 import com.tech.imagecorebackendpictureservice.infrastructure.manager.upload.UrlPictureUpload;
 import com.tech.imagecorebackendpictureservice.infrastructure.manager.upload.model.dto.file.UploadPictureResult;
+import com.tech.imagecorebackendpictureservice.infrastructure.mq.consumer.CanalHandleVo;
 import com.tech.imagecorebackendserviceclient.application.service.SpaceFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -73,6 +78,12 @@ public class PictureDomainServiceImpl
 
     @Autowired
     private CosManager cosManager;
+
+    @Resource
+    private CacheManager cacheManager;
+
+    @Resource
+    private PictureCacheHandler pictureCacheHandler;
 
     @Resource
     private TransactionTemplate transactionTemplate;
@@ -592,6 +603,38 @@ public class PictureDomainServiceImpl
     public String uploadUserAvatar(MultipartFile multipartFile, String uploadPathPrefix) {
         UploadPictureResult uploadPictureResult = filePictureUpload.uploadPicture(multipartFile, uploadPathPrefix);
         return uploadPictureResult.getUrl();
+    }
+
+
+    @Override
+    public void canalHandlePicture(List<CanalHandleVo> canalHandleVoList) {
+        canalHandleVoList.forEach(canalHandleVo -> {
+            CanalEntry.EventType eventType = canalHandleVo.getEventType();
+            Picture picture = JSONUtil.toBean(canalHandleVo.getJsonDataStr(), Picture.class);
+            if (eventType == CanalEntry.EventType.DELETE || cacheManager.getEntry_DELETE_FLAG().equals(picture.getIsDelete())) {
+                canalDeleteHandle(canalHandleVo);
+            }else if (eventType == CanalEntry.EventType.UPDATE) {
+                canalUpdateHandle(canalHandleVo);
+            }else {
+                log.info("canal got insert picture: {}", canalHandleVo.getJsonDataStr());
+            }
+        });
+    }
+
+    private void canalUpdateHandle(CanalHandleVo canalHandleVo) {
+        Picture picture = JSONUtil.toBean(canalHandleVo.getJsonDataStr(), Picture.class);
+        // 1. 更新Home页的缓存
+        pictureCacheHandler.updateHomeCache(CacheUtils.PICTURE_QUERY_CACHE, picture);
+        // 2. 更新单个的缓存
+        pictureCacheHandler.updatePictureCache(CacheUtils.getSinglePictureQueryCacheKey(picture.getId()), picture);
+    }
+
+    private void canalDeleteHandle(CanalHandleVo canalHandleVo) {
+        Picture picture = JSONUtil.toBean(canalHandleVo.getJsonDataStr(), Picture.class);
+        // 1. 删除Home页的缓存
+        pictureCacheHandler.deleteHomeCache(CacheUtils.PICTURE_QUERY_CACHE, picture);
+        // 2. 删除单个的缓存
+        pictureCacheHandler.deletePictureCache(CacheUtils.getSinglePictureQueryCacheKey(picture.getId()));
     }
 }
 

@@ -1,5 +1,6 @@
 package com.tech.imagecorebackendpictureservice.application.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tech.imagecorebackendmodel.dto.picture.PictureCommentQueryRequest;
 import com.tech.imagecorebackendmodel.dto.picture.PictureCommentRequest;
 import com.tech.imagecorebackendmodel.picture.entity.PictureComment;
@@ -13,7 +14,9 @@ public interface PictureCommentApplicationService {
 
     Boolean deletePictureComment(PictureCommentRequest pictureCommentRequest);
 
-    List<PictureCommentRootVo> getPictureCommentRootVo(PictureCommentQueryRequest pictureCommentQueryRequest);
+    Page<PictureCommentRootVo> getPictureCommentRootVo(PictureCommentQueryRequest pictureCommentQueryRequest);
 
-    List<PictureCommentVo> getPictureCommentVo(PictureCommentQueryRequest pictureCommentQueryRequest);
+    Page<PictureCommentVo> getPictureCommentVo(PictureCommentQueryRequest pictureCommentQueryRequest);
+
+    PictureComment getById(Long pictureCommentId);
 }

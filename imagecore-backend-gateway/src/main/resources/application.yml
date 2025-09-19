@@ -5,18 +5,57 @@ spring:
         server-addr: 127.0.0.1:8848
     gateway:
       routes:
+        # 用户服务
         - id: imagecore-backend-user-service
           uri: lb://imagecore-backend-user-service
           predicates:
             - Path=/api/user/**
+        - id: imagecore-backend-user-service-message
+          uri: lb://imagecore-backend-user-service
+          predicates:
+            - Path=/api/message/**
+          filters:
+            - RewritePath=/api/message/(?<segment>.*), /api/user/message/$\{segment}
+        - id: imagecore-backend-user-service-aichat
+          uri: lb://imagecore-backend-user-service
+          predicates:
+            - Path=/api/userAIChat/**
+          filters:
+            - RewritePath=/api/userAIChat/(?<segment>.*), /api/user/userAIChat/$\{segment}
+        # 图片服务
         - id: imagecore-backend-picture-service
           uri: lb://imagecore-backend-picture-service
           predicates:
             - Path=/api/picture/**
+        - id: imagecore-backend-picture-service-picture-comment
+          uri: lb://imagecore-backend-picture-service
+          predicates:
+            - Path=/api/picture_comment/**
+          filters:
+            - RewritePath=/api/picture_comment/(?<segment>.*), /api/picture/picture_comment/$\{segment}
+        - id: imagecore-backend-picture-service-picture-thumb
+          uri: lb://imagecore-backend-picture-service
+          predicates:
+            - Path=/api/thumb/**
+          filters:
+            - RewritePath=/api/thumb/(?<segment>.*), /api/picture/thumb/$\{segment}
+        # 空间服务
         - id: imagecore-backend-space-service
           uri: lb://imagecore-backend-space-service
           predicates:
             - Path=/api/space/**
+        - id: imagecore-backend-space-service-analyze
+          uri: lb://imagecore-backend-space-service
+          predicates:
+            - Path=/api/analyze/**
+          filters:
+            - RewritePath=/api/analyze/(?<segment>.*), /api/space/analyze/$\{segment}
+        - id: imagecore-backend-space-service-spaceUser
+          uri: lb://imagecore-backend-space-service
+          predicates:
+            - Path=/api/spaceUser/**
+          filters:
+            - RewritePath=/api/spaceUser/(?<segment>.*), /api/space/spaceUser/$\{segment}
   application:
     name: imagecore-backend-gateway
   main:

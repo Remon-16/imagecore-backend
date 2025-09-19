@@ -17,4 +17,7 @@ public interface UserScoreConstant {
     Long BETHUMBNAIL_PICTURE_VALUE = 10L;
 
     Long NO_LIMITATION = -1L;
+
+    String YES = "1";
+    String NO = "0";
 }

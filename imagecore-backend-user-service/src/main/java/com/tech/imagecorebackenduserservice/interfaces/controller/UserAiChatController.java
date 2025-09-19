@@ -47,15 +47,15 @@ public class UserAiChatController {
         return ResultUtils.success(userAiChatApplicationService.getChatHisVo(chatHisRequest));
     }
 
-    /**
-     * AI 聊天调用
-     * @param
-     * @return
-     */
-    @GetMapping(value = "/chat/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    Flux<ServerSentEvent<String>> doChatStream(ChatRequest chatRequest){
-        return userAiChatApplicationService.doChatStreamService(chatRequest);
-    }
+//    /**
+//     * AI 聊天调用
+//     * @param
+//     * @return
+//     */
+//    @GetMapping(value = "/chat/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+//    Flux<ServerSentEvent<String>> doChatStream(ChatRequest chatRequest){
+//        return userAiChatApplicationService.doChatStreamService(chatRequest);
+//    }
 
     /**
      * 获取全部聊天历史记录

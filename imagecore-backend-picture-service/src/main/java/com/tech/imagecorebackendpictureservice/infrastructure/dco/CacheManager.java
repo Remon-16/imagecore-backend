@@ -7,6 +7,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.tech.imagecorebackendpictureservice.infrastructure.algorithm.AddResult;
 import com.tech.imagecorebackendpictureservice.infrastructure.algorithm.TopK;
 import com.tech.imagecorebackendcommon.utils.CacheUtils;
+import com.tech.imagecorebackendpictureservice.infrastructure.dco.bean.SortedCacheResult;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +16,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -37,7 +36,27 @@ public class CacheManager {
 
     @Getter
     @Setter
-    private Integer redisExpireTime = 300;
+    private Integer redisExpireTime = 60 * 30;
+
+    @Getter
+    @Setter
+    private Integer redisZSetExpireTime = 24 * 60 * 60;
+    @Getter
+    private final Long defaultPage = 1L;
+    @Getter
+    private final Long defaultSize = 10L;
+
+    @Getter
+    private final Long ZERO = 0L;
+
+    @Getter
+    private final Integer Entry_DELETE_FLAG = 1;
+
+    private static final String DESC = "descend";
+    // 拼接 Key
+    private String buildCacheKeyByHead(String keyHead, String KeyBody){
+        return keyHead + ":" + KeyBody;
+    }
 
 
     // 辅助方法：构造复合 key
@@ -70,6 +89,16 @@ public class CacheManager {
         }
 
         return redisValue;
+    }
+
+    public void removeValueCache(String key){
+        Object value = localCache.getIfPresent(key);
+        if (value != null) {
+            localCache.invalidate(key);
+        }
+        if (redisTemplate.hasKey(RedisKeyUtil.buildRedisKey(key))) {
+            redisTemplate.delete(key);
+        }
     }
 
     public Map<Long, Boolean> getThumbMapCaffeine(String hashKey, List<String> pictureIdList){
@@ -211,7 +240,89 @@ public class CacheManager {
         return redisValue;
     }
 
-    public void putValueToCache(String key,Object value){
+    public void zSetAdd(String key, Object value, Double score) {
+        String redisKey = RedisKeyUtil.buildRedisKey(key);
+        Boolean f = redisTemplate.hasKey(redisKey);
+        redisTemplate.opsForZSet().addIfAbsent(redisKey, value, score);
+        // 不存在就设置一个过期时间
+        if (!f) {
+            int redisCacheExpireTime = redisZSetExpireTime +  RandomUtil.randomInt(0, redisZSetExpireTime);
+            redisTemplate.expire(redisKey, redisCacheExpireTime, TimeUnit.SECONDS);
+        }
+    }
+
+    public void zSetRemove(String key, Object value) {
+        String redisKey = RedisKeyUtil.buildRedisKey(key);
+        Boolean f = redisTemplate.hasKey(redisKey);
+        if (f){
+            redisTemplate.opsForZSet().remove(redisKey, value);
+        }
+    }
+
+    public void insertSortedValue(String sortedKey, Object valueId, Double score, String valueKey, Object value) {
+        this.zSetAdd(sortedKey, valueId, score);
+        this.putValueToCache(valueKey, value, redisZSetExpireTime);
+    }
+
+    public Long getTotal(String totalKey){
+        // 1. 查询 total
+        Object totalValue = this.getValueCache(totalKey);
+        if (totalValue == null) {
+            return null;
+        }
+
+        return Long.parseLong(String.valueOf(totalValue));
+    }
+
+    public SortedCacheResult querySortedValues(String sortedKey, String sortedTotalKey, String keyHead, String sortOrder, Long page, Long size) {
+        Long total = getTotal(sortedTotalKey);
+        if (total == null) {
+            return null;
+        }
+        SortedCacheResult sortedCacheResult = new SortedCacheResult();
+        sortedCacheResult.setTotal(total);
+        // 总数为 0 也算命中
+        if(ZERO.equals(total)){
+            sortedCacheResult.setValueMap(new LinkedHashMap<>());
+            return sortedCacheResult;
+        }
+        // 2. 从zSet里查询id
+        String zSetKey = RedisKeyUtil.buildRedisKey(sortedKey);
+        Set<Object> idSet = null;
+        if(DESC.equals(sortOrder)){
+            idSet = redisTemplate.opsForZSet().reverseRange(zSetKey, (page - 1) * size, page * size - 1);
+        }else{
+            // 默认升序
+            idSet = redisTemplate.opsForZSet().range(zSetKey, (page - 1) * size, page * size - 1);
+        }
+
+        // 满足下列条件，直接返回一个空
+        if(idSet == null || idSet.isEmpty() || !ZERO.equals(total - (page - 1) * size - idSet.size())){
+            return null;
+        }
+
+        // 3. 从id里获取值
+        Map<Object, Object> valueMap = new LinkedHashMap<>();
+        for (Object objId : idSet) {
+            Object value = this.getValueCache(buildCacheKeyByHead(keyHead, objId.toString()));
+            // 里面如果有值过期了，也返回空
+            if(value == null){
+                return null;
+            }
+            valueMap.put(objId, value);
+        }
+        sortedCacheResult.setValueMap(valueMap);
+        return sortedCacheResult;
+    }
+
+
+
+    public void putValueToCache(String key, Object value){
+        this.putValueToCache(key, value, redisExpireTime);
+    }
+
+
+    public void putValueToCache(String key,Object value, Integer expireTime){
         // 1. 记录访问（计数 +1）
         AddResult addResult = hotKeyDetector.add(key, 1);
         if (addResult.isHotKey()) {
@@ -219,7 +330,7 @@ public class CacheManager {
             localCache.put(key, value);
         }
         // 3. 存 Redis
-        int redisCacheExpireTime = redisExpireTime +  RandomUtil.randomInt(0, redisExpireTime);
+        int redisCacheExpireTime = expireTime +  RandomUtil.randomInt(0, expireTime);
         redisTemplate.opsForValue().set(RedisKeyUtil.buildRedisKey(key),
                 value, redisCacheExpireTime, TimeUnit.SECONDS);
     }

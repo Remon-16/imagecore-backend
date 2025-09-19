@@ -21,8 +21,9 @@ public class MessageController {
     private MessageApplicationService messageApplicationService;
 
     @PostMapping("/allMessageREAD")
-    public void allMessageREAD(@RequestBody UserMessageRequest userMessageRequest){
+    public BaseResponse<Boolean> allMessageREAD(@RequestBody UserMessageRequest userMessageRequest){
         messageApplicationService.allMessageREAD(userMessageRequest.getUserId(), userMessageRequest.getMessageType());
+        return ResultUtils.success(true);
     }
 
     @PostMapping("/listMessageVoByPage")
@@ -31,8 +32,9 @@ public class MessageController {
     }
 
     @PostMapping("/changeMessageStatus")
-    public void changeMessageStatus(@RequestBody UserMessageRequest userMessageRequest){
+    public BaseResponse<Boolean> changeMessageStatus(@RequestBody UserMessageRequest userMessageRequest){
         messageApplicationService.changeMessageStatus(userMessageRequest.getMessageId(), userMessageRequest.getMessageStatus());
+        return ResultUtils.success(true);
     }
     @PostMapping("/getExistUnReadMessage")
     public BaseResponse<Boolean> getExistUnReadMessage(@RequestBody UserMessageRequest userMessageRequest){

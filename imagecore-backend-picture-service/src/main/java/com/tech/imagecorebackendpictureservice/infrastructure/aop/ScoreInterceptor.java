@@ -59,14 +59,14 @@ public class ScoreInterceptor {
         User loginUser = this.getLoginUser();
         Long userId = loginUser.getId();
 
-        // 会员直接过
+        String type = deductScore.type();
+        // 不是兑换会员的话，会员直接过
         Date vipExpiry = loginUser.getVipExpiry();
-        if(vipExpiry != null && vipExpiry.before(new Date())){
+        if(!UserScoreConstant.MONTH_VIP.equals(type) && vipExpiry != null && vipExpiry.before(new Date())){
             return joinPoint.proceed();
         }
 
         long maxCount = deductScore.maxCount();
-        String type = deductScore.type();
         UserScoreRequest userScoreRequest = new UserScoreRequest();
         userScoreRequest.setScoreType(type);
         userScoreRequest.setUserId(loginUser.getId());
@@ -78,7 +78,7 @@ public class ScoreInterceptor {
         String lock = String.valueOf(loginUser.getId()).intern();
         synchronized (lock) {
             // 检查积分是否足够
-            if (!userFeignClient.checkScore(userScoreRequest)) {
+            if (!UserScoreConstant.YES.equals(userFeignClient.checkScore(userScoreRequest))) {
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "积分不足");
             }
 

@@ -159,7 +159,11 @@ public class PictureVO implements Serializable {
             pictureVO.setThumbCount(picture.getThumbCount().longValue());
         }
         // 类型不同，需要转换
-        pictureVO.setTags(JSONUtil.toList(picture.getTags(), String.class));
+        if(picture.getTags() != null && !picture.getTags().isEmpty()) {
+            pictureVO.setTags(JSONUtil.toList(picture.getTags(), String.class));
+        }else{
+            pictureVO.setTags(List.of());
+        }
         return pictureVO;
     }
 }

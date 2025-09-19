@@ -2,10 +2,12 @@ package com.tech.imagecorebackendserviceclient.application.service;
 
 
 import com.tech.imagecorebackendmodel.dto.space.analyze.*;
-import com.tech.imagecorebackendmodel.dto.user.UserUpdateInfoRequest;
 import com.tech.imagecorebackendmodel.picture.entity.Picture;
+import com.tech.imagecorebackendmodel.picture.entity.PictureComment;
+import com.tech.imagecorebackendmodel.picture.entity.Thumb;
 import com.tech.imagecorebackendmodel.vo.space.analyze.SpaceCategoryAnalyzeResponse;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,6 +42,12 @@ public interface PictureFeignClient {
      * 用户上传头像
      * @return
      */
-    @PostMapping("/upload_user_avatar")
-    String uploadUserAvatar(@RequestPart("file") MultipartFile multipartFile, String uploadPathPrefix);
+    @PostMapping(value = "/upload_user_avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    String uploadUserAvatar(@RequestPart("file") MultipartFile multipartFile, @RequestParam("uploadPathPrefix") String uploadPathPrefix);
+
+    @GetMapping("/pictureComment/get/id")
+    PictureComment getPictureCommentById(@RequestParam("pictureCommentId") Long pictureCommentId);
+
+    @GetMapping("/thumb/get/id")
+    Thumb getThumbById(@RequestParam("thumbId") Long thumbId);
 }

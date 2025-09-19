@@ -7,8 +7,11 @@ import cn.hutool.core.text.StrPool;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tech.imagecorebackendcommon.utils.CacheUtils;
 import com.tech.imagecorebackendmodel.picture.entity.Picture;
+import com.tech.imagecorebackendmodel.user.constant.MessageConstant;
 import com.tech.imagecorebackendmodel.user.constant.UserScoreConstant;
+import com.tech.imagecorebackendmodel.user.entity.Message;
 import com.tech.imagecorebackendmodel.user.entity.ScoreUser;
+import com.tech.imagecorebackendmodel.user.valueobject.MessageType;
 import com.tech.imagecorebackendpictureservice.infrastructure.dco.RedisKeyUtil;
 import com.tech.imagecorebackendmodel.picture.entity.Thumb;
 import com.tech.imagecorebackendmodel.picture.valueobject.ThumbTypeEnum;
@@ -50,6 +53,7 @@ public class SyncThumb2DBJob {
         DateTime nowDate = DateUtil.date();
         String date = DateUtil.format(nowDate, "HH:mm:") + (DateUtil.second(nowDate) / 10 - 1) * 10;
         syncThumb2DBByDate(date);
+        syncScore2DBByDate(date);
         log.info("临时数据同步完成");
     }
 
@@ -105,10 +109,14 @@ public class SyncThumb2DBJob {
         // 批量更新图片点赞量，增加被点赞的用户积分
         if (!pictureThumbCountMap.isEmpty()) {
             pictureMapper.batchUpdateThumbCount(pictureThumbCountMap);
-            List<Picture> pictureList = pictureMapper.selectByIds(pictureThumbCountMap.keySet());
+            List<Long> pictureIdList = thumbList.stream().map(Thumb::getPictureId).toList();
+            List<Picture> pictureList = pictureMapper.selectByIds(pictureIdList);
             List<ScoreUser> scoreUserList = new ArrayList<>();
             Map<Long, Long> userScoreChangeMap = new HashMap<>();
-            for (Picture picture : pictureList) {
+            List<Message> messageList = new ArrayList<>();
+            for (int i=0; i < pictureList.size(); i++) {
+                Picture picture = pictureList.get(i);
+                Thumb thumb = thumbList.get(i);
                 Long curScore = UserScoreConstant.BETHUMBNAIL_PICTURE_VALUE;
                 ScoreUser scoreUser = new ScoreUser();
                 scoreUser.setUserId(picture.getUserId());
@@ -119,14 +127,30 @@ public class SyncThumb2DBJob {
                 Long userId = picture.getUserId();
                 Long oldScore = userScoreChangeMap.getOrDefault(userId, 0L);
                 userScoreChangeMap.put(userId, oldScore + curScore);
+
+                Message message = new Message();
+                message.setUserId(userId);
+                message.setPictureId(thumb.getPictureId());
+                message.setCommentId(thumb.getId());
+                message.setMessageType(MessageType.THUMB.getValue());
+                message.setContent(MessageConstant.NEW_THUMB);
+                message.setSenderId(MessageConstant.SYSTEM_SENDER_ID);
+                message.setMessageState("0");
+                messageList.add(message);
             }
             userFeignClient.saveBatch(scoreUserList);
+            // 批量发送消息给用户
+            userFeignClient.messageBatchSend(messageList);
             // 批量更新用户积分余额
             if (!userScoreChangeMap.isEmpty()) {
                 userFeignClient.batchUpdateScore(userScoreChangeMap);
             }
         }
-        redisTemplate.delete(tempThumbKey);
+
+        // 使用虚拟线程异步删除
+        Thread.startVirtualThread(() -> {
+            redisTemplate.delete(tempThumbKey);
+        });
     }
 
     public void syncScore2DBByDate(String date){
@@ -143,11 +167,11 @@ public class SyncThumb2DBJob {
         for (Object userIdScoreObj : allScoreThumbMap.keySet()) {
             String userIdScoreType = (String) userIdScoreObj;
             String[] userIdAndScoreType = userIdScoreType.split(StrPool.COLON);
-            Long userId = Long.valueOf(userIdAndScoreType[0]);
+            Long userId = Long.valueOf(userIdAndScoreType[0].replace("\"", ""));
             Long oldScore = userScoreChangeMap.getOrDefault(userId, 0L);
-            Long curScore = (Long) allScoreThumbMap.get(userIdScoreType);
+            Long curScore = Long.parseLong(String.valueOf(allScoreThumbMap.get(userIdScoreType)));
             userScoreChangeMap.put(userId, oldScore + curScore);
-            String scoreType = userIdAndScoreType[1];
+            String scoreType = userIdAndScoreType[1].replace("\"", "");
             ScoreUser scoreUser = new ScoreUser();
             scoreUser.setUserId(userId);
             scoreUser.setScoreType(scoreType);

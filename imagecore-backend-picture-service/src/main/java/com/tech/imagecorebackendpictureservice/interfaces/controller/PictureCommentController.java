@@ -1,11 +1,13 @@
 package com.tech.imagecorebackendpictureservice.interfaces.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tech.imagecorebackendcommon.common.BaseResponse;
 import com.tech.imagecorebackendcommon.common.ResultUtils;
 import com.tech.imagecorebackendcommon.exception.BusinessException;
 import com.tech.imagecorebackendcommon.exception.ErrorCode;
 import com.tech.imagecorebackendmodel.dto.picture.PictureCommentQueryRequest;
 import com.tech.imagecorebackendmodel.dto.picture.PictureCommentRequest;
+import com.tech.imagecorebackendmodel.picture.entity.PictureComment;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.picture.PictureCommentRootVo;
 import com.tech.imagecorebackendmodel.vo.picture.PictureCommentVo;
@@ -36,13 +38,13 @@ public class PictureCommentController {
     private UserFeignClient userFeignClient;
 
     @PostMapping("/saveOrUpdate")
-    public BaseResponse<Boolean> saveOrUpdatePictureComment(@RequestBody PictureCommentRequest pictureCommentRequest, HttpServletRequest request) {
+    public BaseResponse<PictureCommentVo> saveOrUpdatePictureComment(@RequestBody PictureCommentRequest pictureCommentRequest, HttpServletRequest request) {
         if (pictureCommentRequest == null || pictureCommentRequest.getPictureId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        User loginUser = userFeignClient.getUserFromRequest(request);
         // 编辑需要校验用户
         if(pictureCommentRequest.getId() != null) {
-            User loginUser = userFeignClient.getUserFromRequest(request);
             if (loginUser == null) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR);
             }
@@ -50,8 +52,8 @@ public class PictureCommentController {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID与评论ID不一致！");
             }
         }
-        pictureCommentApplicationService.saveOrUpdatePictureComment(pictureCommentRequest);
-        return ResultUtils.success(true);
+        PictureComment pictureComment = pictureCommentApplicationService.saveOrUpdatePictureComment(pictureCommentRequest);
+        return ResultUtils.success(PictureCommentVo.objToVo(pictureComment));
     }
 
 
@@ -72,20 +74,20 @@ public class PictureCommentController {
     }
 
     @PostMapping("/query_root")
-    public BaseResponse<List<PictureCommentRootVo>> getPictureCommentRootVo(@RequestBody PictureCommentQueryRequest pictureCommentQueryRequest){
+    public BaseResponse<Page<PictureCommentRootVo>> getPictureCommentRootVo(@RequestBody PictureCommentQueryRequest pictureCommentQueryRequest){
         if (pictureCommentQueryRequest == null || pictureCommentQueryRequest.getPictureId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        List<PictureCommentRootVo> pictureCommentRootVoList = pictureCommentApplicationService.getPictureCommentRootVo(pictureCommentQueryRequest);
-        return ResultUtils.success(pictureCommentRootVoList);
+        Page<PictureCommentRootVo> pictureCommentRootVoPage = pictureCommentApplicationService.getPictureCommentRootVo(pictureCommentQueryRequest);
+        return ResultUtils.success(pictureCommentRootVoPage);
     }
 
     @PostMapping("/query_second")
-    public BaseResponse<List<PictureCommentVo>> getPictureCommentVo(@RequestBody PictureCommentQueryRequest pictureCommentQueryRequest){
+    public BaseResponse<Page<PictureCommentVo>> getPictureCommentVo(@RequestBody PictureCommentQueryRequest pictureCommentQueryRequest){
         if (pictureCommentQueryRequest == null || pictureCommentQueryRequest.getPictureId() == null || pictureCommentQueryRequest.getTargetId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        List<PictureCommentVo> pictureCommentVoList = pictureCommentApplicationService.getPictureCommentVo(pictureCommentQueryRequest);
-        return ResultUtils.success(pictureCommentVoList);
+        Page<PictureCommentVo> pictureCommentVoPage = pictureCommentApplicationService.getPictureCommentVo(pictureCommentQueryRequest);
+        return ResultUtils.success(pictureCommentVoPage);
     }
 }

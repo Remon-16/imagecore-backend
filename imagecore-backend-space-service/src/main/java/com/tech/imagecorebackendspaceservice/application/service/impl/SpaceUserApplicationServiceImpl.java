@@ -15,6 +15,7 @@ import com.tech.imagecorebackendmodel.space.valueobject.SpaceRoleEnum;
 import com.tech.imagecorebackendmodel.user.entity.User;
 import com.tech.imagecorebackendmodel.vo.space.SpaceUserVO;
 import com.tech.imagecorebackendmodel.vo.space.SpaceVO;
+import com.tech.imagecorebackendmodel.vo.user.UserListVO;
 import com.tech.imagecorebackendmodel.vo.user.UserVO;
 import com.tech.imagecorebackendserviceclient.application.service.UserFeignClient;
 import com.tech.imagecorebackendspaceservice.application.service.SpaceApplicationService;
@@ -46,7 +47,7 @@ public class SpaceUserApplicationServiceImpl extends ServiceImpl<SpaceUserMapper
     private SpaceUserDomainService spaceUserDomainService;
 
     @Resource
-    private UserFeignClient userApplicationService;
+    private UserFeignClient userFeignClient;
 
     @Resource
     @Lazy
@@ -73,7 +74,7 @@ public class SpaceUserApplicationServiceImpl extends ServiceImpl<SpaceUserMapper
         Long userId = spaceUser.getUserId();
         if (add) {
             ThrowUtils.throwIf(ObjectUtil.hasEmpty(spaceId, userId), ErrorCode.PARAMS_ERROR);
-            User user = userApplicationService.getUserById(userId);
+            User user = userFeignClient.getUserById(userId);
             ThrowUtils.throwIf(user == null, ErrorCode.NOT_FOUND_ERROR, "用户不存在");
             Space space = spaceApplicationService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
@@ -93,8 +94,8 @@ public class SpaceUserApplicationServiceImpl extends ServiceImpl<SpaceUserMapper
         // 关联查询用户信息
         Long userId = spaceUser.getUserId();
         if (userId != null && userId > 0) {
-            User user = userApplicationService.getUserById(userId);
-            UserVO userVO = userApplicationService.getUserVO(user);
+            User user = userFeignClient.getUserById(userId);
+            UserVO userVO = userFeignClient.getUserVO(user);
             spaceUserVO.setUser(userVO);
         }
         // 关联查询空间信息
@@ -119,7 +120,9 @@ public class SpaceUserApplicationServiceImpl extends ServiceImpl<SpaceUserMapper
         Set<Long> userIdSet = spaceUserList.stream().map(SpaceUser::getUserId).collect(Collectors.toSet());
         Set<Long> spaceIdSet = spaceUserList.stream().map(SpaceUser::getSpaceId).collect(Collectors.toSet());
         // 2. 批量查询用户和空间
-        Map<Long, List<User>> userIdUserListMap = userApplicationService.listByIds(userIdSet).stream()
+        UserListVO userListVO = userFeignClient.listByIds(userIdSet);
+        List<User> userList = userListVO.getUserList(userListVO.getUserListJson());
+        Map<Long, List<User>> userIdUserListMap = userList.stream()
                 .collect(Collectors.groupingBy(User::getId));
         Map<Long, List<Space>> spaceIdSpaceListMap = spaceApplicationService.listByIds(spaceIdSet).stream()
                 .collect(Collectors.groupingBy(Space::getId));
@@ -132,7 +135,7 @@ public class SpaceUserApplicationServiceImpl extends ServiceImpl<SpaceUserMapper
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
-            spaceUserVO.setUser(userApplicationService.getUserVO(user));
+            spaceUserVO.setUser(userFeignClient.getUserVO(user));
             // 填充空间信息
             Space space = null;
             if (spaceIdSpaceListMap.containsKey(spaceId)) {

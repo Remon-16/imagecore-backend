@@ -42,6 +42,19 @@ public class LoginUserVO implements Serializable {
     private String userProfile;
 
     /**
+     * 用户积分余额
+     */
+    private Long userScore;
+    /**
+     * 会员到期时间
+     */
+    private Date vipExpiry;
+    /**
+     * 会员类型
+     */
+    private String vipType;
+
+    /**
      * 用户角色：user/admin
      */
     private String userRole;
